@@ -9,4 +9,5 @@
 
 ## Completed Assignments
 - [Session 3: Shell Scripting - System Information Script](session3-shell-scripting/README.md)
+- [Session 5: Git & GitHub - Commit Mechanics & Cherry-Pick](session5-git-github/README.md)
 
