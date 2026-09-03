@@ -49,7 +49,8 @@ When running a container with `--net=host` (or `--network host`), Docker disable
 - The container binds directly to the host's network interfaces and ports (e.g., port 80).
 
 ### 5. Apache Running in Host Network Mode (Port 80)
-![Apache Host Network](screenshots/05_host_network_apache.png)
+![Apache Host Network Command](screenshots/05_host_network_apache-cmd.png)
+![Apache Host Network Webpage](screenshots/05_host_network_apache-web.png)
 
 ---
 
@@ -59,10 +60,12 @@ When running a container with `--net=host` (or `--network host`), Docker disable
 A **Bind Mount** maps an exact folder or file from the host filesystem directly into the container's virtual filesystem (`-v /host/path:/container/path`). Unlike Docker Volumes which are managed inside Docker's internal storage directory, Bind Mounts allow immediate bi-directional synchronization. Editing files on the host reflects instantly inside the container without rebuilding the image or restarting the service.
 
 ### 6. Initial Webpage ("Hello students")
-![Initial Bind Mount Content](screenshots/06_bind_mount_initial.png)
+![Initial Bind Mount Command](screenshots/06_bind_mount_initial-cmd.png)
+![Initial Bind Mount Webpage](screenshots/06_bind_mount_initial-web.png)
 
 ### 7. Real-Time Modification Without Container Restart
-![Modified Bind Mount Content](screenshots/07_bind_mount_modified.png)
+![Modified Bind Mount Command](screenshots/07_bind_mount_modified-cmd.png)
+![Modified Bind Mount Webpage](screenshots/07_bind_mount_modified-web.png)
 
 ---
 

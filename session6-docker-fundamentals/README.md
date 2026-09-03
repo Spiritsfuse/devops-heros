@@ -3,7 +3,7 @@
 ## Task Overview
 This project demonstrates containerizing web applications across multiple programming languages, runtimes, and web servers using Docker. Each application is isolated with its own `Dockerfile`, built into a lightweight Docker image, and run as a container serving a "Hello World" webpage.
 
-### 📋 Applications Summary
+### Applications Summary
 
 | # | Application | Type / Technology | Container Port | Host Port | Folder |
 | :-: | :--- | :--- | :-: | :-: | :--- |
