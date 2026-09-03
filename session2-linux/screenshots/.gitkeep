@@ -1,0 +1,5 @@
+# Screenshot filenames expected by session2-linux README.md:
+# 01_hard_soft_link_creation.png
+# 02_hard_soft_link_deletion.png
+# 03_adduser_execution.png
+# 04_journalctl_service_logs.png
