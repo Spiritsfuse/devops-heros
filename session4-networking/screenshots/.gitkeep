@@ -1,0 +1,11 @@
+# Screenshot filenames expected by session4-networking README.md:
+# 01_ping.png
+# 02_traceroute.png
+# 03_netstat.png
+# 04_telnet.png
+# 05_tcpdump.png
+# 06_nslookup.png
+# 07_dig.png
+# 08_curl.png
+# 09_arp.png
+# 10_systemctl.png

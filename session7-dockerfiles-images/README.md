@@ -1,12 +1,12 @@
 # Session 7: Docker Multi-Stage Build & Application Deployments
 
-## 👤 Student Information
+## Student Information
 - **Name:** Dhruv Sharma
 - **Enrollment Number (Roll No):** 24BCS10294
 
 ---
 
-## 📌 Task 1 & 2: Multi-Stage Dockerfile Execution & Verification
+## Task 1 & 2: Multi-Stage Dockerfile Execution & Verification
 
 ### Overview
 A multi-stage Docker build was created to optimize image size and security by separating the build-time environment from the minimal runtime environment.
@@ -23,7 +23,7 @@ A multi-stage Docker build was created to optimize image size and security by se
 
 ---
 
-## 📌 Task 3: Docker Application Deployment (3 Different App Types)
+## Task 3: Docker Application Deployment (3 Different App Types)
 
 ### Overview
 Deploying applications with Docker involves packaging individual language runtimes, compiling dependencies, binding host ports, and serving live HTTP traffic. Three distinct application architectures were deployed:
