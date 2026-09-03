@@ -14,4 +14,5 @@
 - [Session 5: Git & GitHub - Commit Mechanics & Cherry-Pick](session5-git-github/README.md)
 - [Session 6: Docker Fundamentals - Hello World Web Applications](session6-docker-fundamentals/README.md)
 - [Session 7: Dockerfiles & Custom Images](session7-dockerfiles-images/README.md)
+- [Session 8: Docker Networking & Volumes](session8-docker-networking-volume/README.md)
 

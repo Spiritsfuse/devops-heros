@@ -1,0 +1,8 @@
+# Screenshot filenames expected by session8 README.md:
+# 01_networks_created.png
+# 02_frontend_to_backend_ping.png
+# 03_frontend_to_database_isolation.png
+# 04_backend_to_database_ping.png
+# 05_host_network_apache.png
+# 06_bind_mount_initial.png
+# 07_bind_mount_modified.png
