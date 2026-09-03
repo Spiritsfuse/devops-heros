@@ -1,11 +1,12 @@
 {
-  "name": "docker-hello-world",
+  "name": "nodejs-app",
   "version": "1.0.0",
+  "description": "Hello World Node.js Web Application for Docker",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^4.19.2"
   }
 }
