@@ -15,4 +15,8 @@
 - [Session 6: Docker Fundamentals - Hello World Web Applications](session6-docker-fundamentals/README.md)
 - [Session 7: Dockerfiles & Custom Images](session7-dockerfiles-images/README.md)
 - [Session 8: Docker Networking & Volumes](session8-docker-networking-volume/README.md)
+- [Session 9: Kubernetes Fundamentals](session9-k8s/Assignment_Readme.md)
+- [Session 10: Kubernetes Pods, ReplicaSets & Deployments](session10-k8s-core-objects/Assignment_Readme.md)
+- [Session 11: Kubernetes Networking & Services](session-11-kubernetes-services/Assignment_Readme.md)
+- [Session 12: Kubernetes Ingress, ConfigMaps & Secrets](session-12-ingress-configmaps-secrets/Assignment_Readme.md)
 
