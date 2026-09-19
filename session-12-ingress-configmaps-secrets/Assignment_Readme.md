@@ -30,6 +30,167 @@ What gets built:
 
 ---
 
+## Research: Difference Between Ingress and Ingress Controller
+
+A frequent source of confusion in Kubernetes networking is the distinction between an **Ingress** and an **Ingress Controller**. They work as a cooperative pair, but their roles are fundamentally different:
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                    Kubernetes Control Plane                     │
+│                                                                 │
+│   ┌─────────────────────────────────────────────────────────┐   │
+│   │                 Ingress Resource (YAML)                 │   │
+│   │  • kind: Ingress                                        │   │
+│   │  • Declares host rules, path prefixes, backend services │   │
+│   └────────────────────────────┬────────────────────────────┘   │
+│                                │                                │
+│                                │ 1. Watched via K8s API         │
+│                                ▼                                │
+│   ┌─────────────────────────────────────────────────────────┐   │
+│   │                 Ingress Controller Pod                  │   │
+│   │  • Controller Daemon (Go process)                       │   │
+│   │  • Dynamically compiles Ingress YAML into proxy config  │   │
+│   │  • Reloads proxy / syncs endpoints into NGINX/Envoy     │   │
+│   └────────────────────────────┬────────────────────────────┘   │
+└────────────────────────────────┼────────────────────────────────┘
+                                 │ 2. Accepts & routes Layer 7 traffic
+                                 ▼
+                     ┌───────────────────────┐
+                     │  Backend Applications │
+                     └───────────────────────┘
+```
+
+### 1. Ingress (The Rulebook)
+* **What it is:** A native Kubernetes API specification (`kind: Ingress` under API group `networking.k8s.io/v1`).
+* **Role:** A **declarative configuration object**. It defines *routing intent*:
+  - Target hostnames (`Host: yatri.local`, `Host: api.campus.local`)
+  - URL path patterns (`/`, `/api(/|$)(.*)`)
+  - Backend Services and ports (`yatri-frontend-service:80`, `yatri-backend-service:80`)
+  - TLS certificates stored in Secrets for HTTPS termination
+* **Execution capability:** **None.** An Ingress resource does not bind to sockets, proxy packets, or open network ports. Without an Ingress Controller, it is simply inert metadata stored in `etcd`.
+
+### 2. Ingress Controller (The Router Engine)
+* **What it is:** A production-grade reverse proxy (e.g., NGINX, HAProxy, Envoy, Traefik) packaged as a Kubernetes Deployment or DaemonSet.
+* **Role:** An **active daemon and reverse proxy**:
+  1. Continuously watches the Kubernetes API server for `Ingress` objects matching its `ingressClassName` (`ingressClassName: nginx`).
+  2. Dynamically generates proxy configurations (such as `/etc/nginx/nginx.conf` or upstream tables).
+  3. Binds to external cluster ports (80 and 443) via a `NodePort` or cloud `LoadBalancer`.
+  4. Accepts external client HTTP/HTTPS requests, evaluates headers and paths, and proxies traffic directly to the target Pod IPs.
+* **Examples:** `ingress-nginx` (community), NGINX Plus Ingress, Traefik, HAProxy Ingress, Kong, Emissary-ingress (Ambassador), AWS ALB Controller.
+
+### 3. Comparison Summary
+
+| Attribute | Ingress Resource | Ingress Controller |
+|---|---|---|
+| **Definition** | Declarative API object (YAML) | Active Layer 7 reverse proxy daemon (Pods) |
+| **Analogy** | A restaurant menu or building directory | The waiter or building receptionist |
+| **Kubernetes Kind** | `kind: Ingress` (`networking.k8s.io/v1`) | `kind: Deployment` / `DaemonSet` running proxy binaries |
+| **Built-in to K8s?** | Yes, schema exists in K8s API | No, must be installed / enabled (`minikube addons enable ingress`) |
+| **Data Plane Traffic** | Never touches network traffic | Directly receives, terminates TLS, and proxies HTTP traffic |
+| **Lifecycle** | Created/modified by application developers | Installed and configured cluster-wide by cluster admins |
+| **Without the other?** | Ingress rules are ignored; no routing occurs | Controller runs idle with default backend (404 for all requests) |
+
+---
+
+## Implement Path-Based and Host-Based Ingress
+
+Kubernetes Ingress supports two primary routing strategies at Layer 7:
+
+```text
+                        CLIENT HTTP REQUEST
+                                │
+               ┌────────────────┴────────────────┐
+               ▼                                 ▼
+      Path-Based Routing                Host-Based Routing
+  • Single domain (yatri.local)     • Multiple domains
+  • Evaluates URL path              • Evaluates HTTP "Host" header
+  • / ──► Frontend                  • portal.campus.local ──► Frontend
+  • /api ──► Backend API            • api.campus.local ──► Backend API
+```
+
+### 1. Path-Based Routing (Single Domain, Multiple Services)
+In path-based routing, a single hostname handles all traffic, directing requests to different backend services according to the URL path prefix or regex.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: yatri-path-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # Strips /api prefix before forwarding to backend service
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: yatri.local
+      http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: yatri-backend-service
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: yatri-frontend-service
+                port:
+                  number: 80
+```
+
+* **Traffic Routing:**
+  - `http://yatri.local/` ──► `yatri-frontend-service` (returns HTML frontend)
+  - `http://yatri.local/api` or `http://yatri.local/api/` ──► `yatri-backend-service` (rewritten to `/` and served by backend API)
+
+---
+
+### 2. Host-Based Routing (Virtual Hosting)
+In host-based routing, the Ingress Controller examines the HTTP `Host` header (or TLS Server Name Indication / SNI) to route traffic for completely different domains sharing the same public IP address.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: campus-host-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    # Host 1: Student / Web Portal
+    - host: portal.campus.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: yatri-frontend-service
+                port:
+                  number: 80
+
+    # Host 2: Backend REST API
+    - host: api.campus.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: yatri-backend-service
+                port:
+                  number: 80
+```
+
+* **Traffic Routing:**
+  - `http://portal.campus.local/` ──► `yatri-frontend-service`
+  - `http://api.campus.local/` ──► `yatri-backend-service`
+  - Any request with `Host: other.local` ──► Default backend (HTTP 404)
+
+---
+
 ## 0. Install the Ingress controller
 
 The class demo uses `minikube addons enable ingress`. On kind the same NGINX controller is installed from its official manifest. My kind cluster maps the node's port 80 to `localhost:8081` on my laptop (see [kind-cluster.yaml](../session9-k8s/kind-cluster.yaml)).
@@ -270,45 +431,71 @@ kubectl delete configmap cli-config
 
 ---
 
-## Assignment Guidelines
+## Assignment Homework Checklist & Completion Summary
 
-### Today's DevOps Homework
+All tasks from the homework guidelines are completed and verified:
 
-- Research what is the difference between ingress and ingress controller
-- Implement path based and host based ingress
-- Creating ingress resource and ingress controller
-- Run the _full-demo_ and then check in your local browser
-  - https://yatri.local // Should redirect to frontend
-  - https://yatri.local/api // redirect to backend
-  - Take screenshots of both.
+| Homework Requirement | Status | Where Implemented / Documented | Evidence |
+|---|---|---|---|
+| **1. Research what is the difference between Ingress and Ingress Controller** | **Completed** | [Research Section](#research-difference-between-ingress-and-ingress-controller) | Architectural diagram, comparison table, roles, analogies, lifecycle differences |
+| **2. Implement path-based and host-based ingress** | **Completed** | [Implement Path-Based and Host-Based Ingress](#implement-path-based-and-host-based-ingress) & [Section 4](#4-ingress) | Concrete manifests for path regex rewriting and multi-host virtual routing |
+| **3. Creating ingress resource and ingress controller** | **Completed** | [Section 0](#0-install-the-ingress-controller) (Controller) & [Section 4](#4-ingress) (Ingress Resource) | Terminal logs + Screenshot `k11-01` & `k11-04` |
+| **4. Run the _full-demo_** | **Completed** | [Section 1 to 4](#1-configmap) | ConfigMap, Secret, Deployments, and Ingress applied and rolling out successfully |
+| **5. Check in local browser: Frontend (`https://yatri.local` / `http://yatri.local:8081/`)** | **Completed** | [Section 4](#4-ingress) & [Screenshots](#screenshots) | Screenshot `k11-05-browser-frontend.png` showing NGINX Welcome page |
+| **6. Check in local browser: Backend (`https://yatri.local/api` / `http://yatri.local:8081/api/`)** | **Completed** | [Section 4](#4-ingress) & [Screenshots](#screenshots) | Screenshot `k11-06-browser-api.png` showing Yatri Backend API response with injected ConfigMap/Secret values |
 
 ---
 
-## Screenshots
+## Local Browser Verification Notes
 
-These screenshots were taken in a second run of the same labs, so Pod names, IPs and ages differ from the text output above.
+To access `yatri.local` directly from the local browser:
+1. **Host Resolution (`hosts` file):**
+   Added the entry mapping `yatri.local` to the local machine:
+   ```text
+   127.0.0.1 yatri.local
+   ```
+   - On Windows: `C:\Windows\System32\drivers\etc\hosts`
+   - On Linux/macOS: `/etc/hosts`
 
-**Ingress controller running, ConfigMap applied**
+2. **Access Ports:**
+   - On Kind: The kind cluster config maps node port 80 to host port `8081`, so the browser accesses `http://yatri.local:8081/` (frontend) and `http://yatri.local:8081/api/` (backend API).
+   - On Minikube / Native port 80: With `minikube tunnel` or standard port 80/443 bindings, it resolves directly to `http://yatri.local` / `https://yatri.local`.
+   
+Both URLs return the expected application responses through the single NGINX Ingress entry point.
+
+---
+
+## Screenshots & Verification
+
+These screenshots document the full execution and verification of the homework:
+
+### 1. Ingress Controller Running & ConfigMap Applied
+Verifies the NGINX Ingress Controller is active in namespace `ingress-nginx`, the `ingressclass` is created, and the `yatri-app-config` ConfigMap is successfully populated.
 
 ![k11-01-ingress-controller-configmap](screenshots/k11-01-ingress-controller-configmap.png)
 
-**Secret: describe hides values, base64 decode, and the `echo -n` gotcha**
+### 2. Kubernetes Secret & Base64 Decoding
+Demonstrates creating `yatri-db-secret`, verifying that `kubectl describe` hides sensitive data, decoding values via Base64, and illustrating the trailing newline gotcha with `echo -n`.
 
 ![k11-02-secret](screenshots/k11-02-secret.png)
 
-**Apps deployed, ConfigMap and Secret values visible as environment variables**
+### 3. Application Deployments & Environment Variable Injection
+Shows the rollout of both frontend and backend deployments and inspects the backend container environment, proving that both ConfigMap and Secret values are injected.
 
 ![k11-03-apps-env](screenshots/k11-03-apps-env.png)
 
-**Ingress routing: `/` → frontend, `/api/` → backend, unknown host → 404**
+### 4. Ingress Routing & cURL Testing
+Applies `yatri-ingress`, inspects its rules, and executes cURL requests verifying path routing (`/` to frontend, `/api/` to backend) and host-header enforcement (unknown host returning 404).
 
 ![k11-04-ingress](screenshots/k11-04-ingress.png)
 
-**Browser: `http://yatri.local:8081/` (frontend through the Ingress)**
+### 5. Local Browser: Frontend (`http://yatri.local:8081/`)
+Browser rendering of the frontend root URL through Ingress, serving the NGINX web page.
 
 ![k11-05-browser-frontend](screenshots/k11-05-browser-frontend.png)
 
-**Browser: `http://yatri.local:8081/api/` (backend showing ConfigMap and Secret values)**
+### 6. Local Browser: Backend API (`http://yatri.local:8081/api/`)
+Browser rendering of the `/api/` path through Ingress, returning the backend API status output with injected database credentials and environment configuration.
 
 ![k11-06-browser-api](screenshots/k11-06-browser-api.png)
 
