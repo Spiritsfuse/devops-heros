@@ -1,4 +1,5 @@
 # Kubernetes Volumes
+ <!-- Add hostpath demo commands as well, explaining all the commands  -->
 
 ## What will we learn?
 

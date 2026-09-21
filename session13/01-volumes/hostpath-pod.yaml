@@ -8,7 +8,7 @@ spec:
       image: nginx:1.27
       volumeMounts:
         - name: host-storage
-          mountPath: /data
+          mountPath: /data # Task-1: change this path
   volumes:
     - name: host-storage
       hostPath:
