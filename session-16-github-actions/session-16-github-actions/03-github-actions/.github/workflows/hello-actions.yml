@@ -4,8 +4,8 @@ on:
     branches:
       - main
       - feature/*
-on:
-  workflow_dispatch:
+# on:
+#   workflow_dispatch:
 jobs:
   hello:
     runs-on: ubuntu-latest
