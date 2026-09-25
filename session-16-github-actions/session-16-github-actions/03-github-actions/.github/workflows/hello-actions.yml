@@ -1,11 +1,6 @@
 name: Hello GitHub Actions
 on:
-  push:
-    branches:
-      - main
-      - feature/*
-# on:
-#   workflow_dispatch:
+  workflow_dispatch:
 jobs:
   hello:
     runs-on: ubuntu-latest
