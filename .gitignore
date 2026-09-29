@@ -1,3 +1,6 @@
+./node_modules/
+.zip
+
 # Private study guides & personal notes
 *DOCKER_GUIDE.md
 *_GUIDE.md
@@ -9,3 +12,4 @@ Thumbs.db
 
 # Binaries
 minikube*
+
