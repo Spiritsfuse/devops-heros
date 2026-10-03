@@ -1,3 +1,4 @@
+# 1. VPC
 resource "aws_vpc" "main" {
   cidr_block           = "10.20.0.0/16"
   enable_dns_support   = true
@@ -10,6 +11,7 @@ resource "aws_vpc" "main" {
   }
 }
 
+# 2. Public Subnet
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.20.1.0/24"
@@ -23,6 +25,7 @@ resource "aws_subnet" "public" {
   }
 }
 
+# 3. Internet Gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
@@ -33,6 +36,7 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
+# 4. Route Table & Association
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
@@ -53,10 +57,19 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+# 5. Security Group
 resource "aws_security_group" "web" {
   name        = "session19-mini-web-sg"
-  description = "Allow HTTP and HTTPS for Session 19"
+  description = "Allow HTTP, HTTPS, and SSH for Session 19"
   vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   ingress {
     description = "HTTP"
@@ -84,6 +97,56 @@ resource "aws_security_group" "web" {
 
   tags = {
     Name      = "session19-mini-web-sg"
+    Session   = "19"
+    ManagedBy = "Terraform"
+  }
+}
+
+# 6. AMI Data Source for Ubuntu Linux
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+# 7. EC2 Instance
+resource "aws_instance" "web" {
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.public.id
+  vpc_security_group_ids      = [aws_security_group.web.id]
+  associate_public_ip_address = true
+
+  user_data = <<-EOF
+              #!/bin/bash
+              echo "Hello from Session 19 Cloud Infrastructure" > index.html
+              python3 -m http.server 80 &
+              EOF
+
+  tags = {
+    Name      = "session19-web-server"
+    Session   = "19"
+    ManagedBy = "Terraform"
+  }
+}
+
+# 8. S3 Storage Bucket
+resource "aws_s3_bucket" "app_storage" {
+  bucket        = var.bucket_name
+  force_destroy = true
+
+  tags = {
+    Name      = var.bucket_name
     Session   = "19"
     ManagedBy = "Terraform"
   }
