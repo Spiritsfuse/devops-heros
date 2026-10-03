@@ -1,5 +1,5 @@
-# Create a research.md/readme.md file where mention what u learnt from this whole session and this final-ci-cd pipeline
-name: Final CI Pipeline
+name: CI/CD Pipeline - Calculator App
+
 on:
   push:
     branches:
@@ -8,66 +8,100 @@ on:
     branches:
       - main
   workflow_dispatch:
+
 jobs:
+  # ==========================================
+  # CI: CONTINUOUS INTEGRATION
+  # ==========================================
   test:
-    name: Test Application
+    name: Unit & Regression Testing
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v6
-      - name: Setup Python
-        uses: actions/setup-python@v7
+        uses: actions/checkout@v4
+
+      - name: Setup Python Runtime
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Display Python version
-        run: python --version
-      - name: Install dependencies
+
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run tests
+
+      - name: Run Test Suite (pytest)
         run: |
           pytest -v
+
   build:
-    name: Build Application
+    name: Build & Package Artifacts
     needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+
       - name: Setup Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build application
+
+      - name: Build Application Package
         run: |
           chmod +x build.sh
           ./build.sh
-      - name: Show build output
-        run: |
-          cat build/build-info.txt
-      - name: Upload build artifact
+
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: calculator-build
           path: build/
-  security-check:
-    name: Security Check
+
+  security-scan:
+    name: Repository Security Scan
     needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v6
-      - name: Check for sensitive files
+        uses: actions/checkout@v4
+
+      - name: Secret Leak Prevention
         run: |
-          echo "Checking repository for common sensitive files..."
-          if find . -type f \( \
-            -name ".env" \
-            -o -name "*.pem" \
-            -o -name "*.key" \
-          \) | grep -q .; then
-            echo "Potential sensitive file found."
+          echo "Scanning for accidentally committed credentials or secrets..."
+          if find . -type f \( -name ".env" -o -name "*.pem" -o -name "*.key" \) | grep -q .; then
+            echo "Security Alert: Sensitive file found!"
             exit 1
           else
-            echo "No common sensitive files found."
+            echo "Security Pass: No unencrypted secrets detected."
           fi
+
+  # ==========================================
+  # CD: CONTINUOUS DELIVERY / DEPLOYMENT
+  # ==========================================
+  cd-deploy:
+    name: Continuous Delivery & Container Packaging
+    needs: [build, security-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: calculator-build
+          path: build/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Container Image
+        run: |
+          docker build -t calculator-app:${{ github.sha }} .
+          echo "Container image calculator-app:${{ github.sha }} successfully built and packaged."
+
+      - name: Deploy Staging Verification
+        run: |
+          echo "Simulating automated deployment to Staging environment..."
+          echo "Deployment completed successfully for commit ${{ github.sha }}."
