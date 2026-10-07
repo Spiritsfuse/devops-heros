@@ -1,9 +1,11 @@
 # Session 19 Screenshots
-
+ 
 This directory stores execution and verification screenshots for Session 19:
-- `01-terraform-init-validate.png`: `terraform init` and `terraform validate`.
-- `02-terraform-plan-architecture.png`: `terraform plan` output showing the 5-tier architecture resources to create.
-- `03-terraform-apply-success.png`: `terraform apply` output with outputs (`vpc_id`, `ec2_public_ip`, `s3_bucket_arn`).
-- `04-aws-ec2-vpc-console.png`: AWS CLI or console verification of EC2 running inside the public subnet.
-- `05-aws-s3-bucket-verify.png`: Verification of S3 bucket via `aws s3 ls`.
-- `06-terraform-destroy.png`: Clean destruction of all provisioned cloud resources via `terraform destroy`.
+- `aws_sts_get-caller-identity.png`: AWS STS authentication verification showing IAM user identity.
+- `aws_configure_list.png`: AWS CLI active credentials and default region (`ap-south-1`).
+- `terraform_init_fmt_validate.png`: Terraform provider downloads, formatting check, and configuration validation.
+- `terraform_plan_1.png` to `terraform_plan_5.png`: Terraform execution plans detailing resource changes.
+- `terraform_apply_1.png` to `terraform_apply_5.png`: Terraform apply execution provisioning AWS infrastructure.
+- `terraform_show_1.png` to `terraform_show_6.png`: Inspection of state and created resources.
+- `terraform_state_list_&_output.png`: Verification of tracked resources and exported output values.
+

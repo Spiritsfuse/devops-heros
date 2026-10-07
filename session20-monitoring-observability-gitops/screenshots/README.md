@@ -1,57 +1,57 @@
 # Session 20 Screenshots
 
 This directory stores execution and verification screenshots for Monitoring, Observability & GitOps:
-- `01-metrics-server-top.png`: `kubectl top nodes` and `kubectl top pods` resource utilization.
-- `02-prometheus-grafana-dashboard.png`: Grafana dashboard displaying cluster CPU, memory, and network throughput.
-- `03-argocd-installation.png`: Argo CD namespace, pods, and web UI login.
-- `04-argocd-application-synced.png`: Argo CD application status showing "Synced" and "Healthy".
-- `05-gitops-auto-reconciliation.png`: Automated self-healing/reconciliation after making changes in Git.
+- `01-docker-compose-up-ps.png`: Docker Compose stack startup and container process health check for Prometheus and Grafana.
+- `02-prometheus-query.png`: Prometheus web UI demonstrating target scraping and metrics query execution.
+- `03-grafana-dashboard.png`: Grafana dashboard displaying container and cluster metrics visualization panels.
+- `04-argocd-installation.png`: Argo CD namespace creation, CRD installation, and controller pod verification.
+- `05-argocd-application-synced.png`: Argo CD web UI showing application `session20-app` in Synced and Healthy status.
 
 ---
 
 ## Screenshot Execution Commands Breakdown (`cmd-explained`)
 
-### 1. `01-metrics-server-top.png`
-```bash
-kubectl top nodes
-kubectl top pods -A
-```
-#### 💡 Command Breakdown (`cmd-explained`):
-- `kubectl top nodes`: Connects to the Kubernetes Metrics Server to pull instantaneous node-level CPU core allocation and memory megabytes.
-- `kubectl top pods -A`: Evaluates container-level resource consumption across all cluster namespaces (`-A`), pinpointing noisy neighbor containers.
-
-### 2. `02-prometheus-grafana-dashboard.png`
+### 1. `01-docker-compose-up-ps.png`
 ```bash
 docker compose up -d
-# Access: http://localhost:3000 (Grafana) -> Data Source: http://prometheus:9090
+docker compose ps
 ```
 #### 💡 Command Breakdown (`cmd-explained`):
 - `docker compose up -d`: Spawns Prometheus and Grafana detached (`-d`) in background containers.
-- Demonstrates how metrics collected by Prometheus are graphed into interactive visualization panels inside Grafana dashboards.
+- `docker compose ps`: Verifies that `session20-prometheus` and `session20-grafana` are running and bound to host ports.
 
-### 3. `03-argocd-installation.png`
+### 2. `02-prometheus-query.png`
 ```bash
-kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+# Access: http://localhost:9090
+```
+#### 💡 Command Breakdown (`cmd-explained`):
+- Accesses Prometheus Expression Browser to execute PromQL queries and inspect scrape targets.
+
+### 3. `03-grafana-dashboard.png`
+```bash
+# Access: http://localhost:3000 -> Data Source: http://prometheus:9090
+```
+#### 💡 Command Breakdown (`cmd-explained`):
+- Visualizes time-series metrics collected by Prometheus into interactive charts and operational dashboards.
+
+### 4. `04-argocd-installation.png`
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl get pods -n argocd
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 #### 💡 Command Breakdown (`cmd-explained`):
-- `--server-side`: Performs Server-Side Apply to avoid client annotation size overflow when registering Argo CD's large CRDs.
-- `port-forward svc/argocd-server 8080:443`: Binds host port 8080 to the Argo CD HTTPS server, allowing browser access to the GitOps control plane.
+- `create namespace argocd`: Provisions dedicated namespace for GitOps controllers.
+- `apply -f ...`: Deploys Argo CD CRDs, API server, repo server, and application controller.
+- `get pods -n argocd`: Verifies all Argo CD core controller pods reach Running state.
+- `port-forward svc/argocd-server`: Exposes the Argo CD dashboard to `https://localhost:8080`.
 
-### 4. `04-argocd-application-synced.png`
+### 5. `05-argocd-application-synced.png`
 ```bash
-kubectl apply -f app/argocd-application.yaml
-kubectl get applications -n argocd
+kubectl apply -f 08-mini-project/app/argocd-application.yaml
 ```
 #### 💡 Command Breakdown (`cmd-explained`):
-- `kubectl apply -f ...`: Tells Argo CD to watch the Git repository path.
-- `get applications -n argocd`: Verifies that the application status displays `Synced` (Git commit == Cluster state) and `Healthy` (Pods running).
+- Submits the Argo CD Application manifest to track the target Git repository path.
+- In the Argo CD web UI (`localhost:8080`), verifies that `session20-app` achieves `Synced` (cluster matches Git) and `Healthy` status.
 
-### 5. `05-gitops-auto-reconciliation.png`
-```bash
-kubectl scale deployment session20-mini -n session20 --replicas=1
-kubectl get deployment -n session20 -w
-```
-#### 💡 Command Breakdown (`cmd-explained`):
-- `scale --replicas=1`: Artificially induces configuration drift by imperatively shrinking the deployment.
-- `-w`: Observes Argo CD's active **Self-Healing** loop detecting the deviation and automatically scaling the cluster back to the Git-defined replica count.

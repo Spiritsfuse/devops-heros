@@ -175,22 +175,21 @@ spec:
 ## Screenshot Placeholders & Deliverables Checklist
 
 ### Screenshots & Evidences:
-1. **Prometheus Query & Metrics Collection**:
-   ![Prometheus Query](screenshots/prometheus_query.png)
+1. **Docker Compose Monitoring Stack (`docker compose ps`)**:
+   ![Docker Compose Services](screenshots/01-docker-compose-up-ps.png)
 
-2. **Grafana Monitoring Dashboard**:
-   ![Grafana Dashboard](screenshots/grafana_dashboard.png)
+2. **Prometheus Query & Metrics Collection**:
+   ![Prometheus Query](screenshots/02-prometheus-query.png)
 
-3. **Docker Compose Monitoring Stack (`docker compose ps`)**:
-   ![Docker Compose Services](screenshots/docker_compose_up_ps.png)
+3. **Grafana Monitoring Dashboard**:
+   ![Grafana Dashboard](screenshots/03-grafana-dashboard.png)
 
 4. **Argo CD Controller Installation & Cluster Status**:
-   ![ArgoCD Install](screenshots/03-argocd-installation.png)
-   *(Screenshot showing `kubectl get pods -n argocd` or Argo CD UI)*
+   ![ArgoCD Install](screenshots/04-argocd-installation.png)
 
 5. **Argo CD Application Synced & Healthy**:
-   ![ArgoCD Synced](screenshots/04-argocd-application-synced.png)
-   *(Screenshot of Argo CD UI showing application in Synced and Healthy state)*
+   ![ArgoCD Synced](screenshots/05-argocd-application-synced.png)
+
 
 | Deliverable | Location | Status |
 | :--- | :--- | :---: |

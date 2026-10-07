@@ -1,4 +1,4 @@
-﻿# Session 19: Cloud & Terraform in Action - Assignment
+# Session 19: Cloud & Terraform in Action - Assignment
 
 ## Student Information
 - **Name:** Dhruv Sharma
@@ -187,25 +187,23 @@ All 8 cloud resources are safely terminated in reverse topological order, avoidi
 
 ## Screenshot Placeholders & Deliverables Checklist
 
-### Screenshot Placeholders:
-1. **Initialization & Validation**:
-   ![Terraform Init & Validate](screenshots/01-terraform-init-validate.png)
-   *(Run `terraform init` and `terraform validate`)*
-2. **Execution Plan**:
-   ![Terraform Plan](screenshots/02-terraform-plan-architecture.png)
-   *(Run `terraform plan` showing the 8 resources to be created)*
-3. **Provisioning Outputs**:
-   ![Terraform Apply](screenshots/03-terraform-apply-success.png)
-   *(Run `terraform apply` showing outputs)*
-4. **AWS EC2 & VPC Verification**:
-   ![EC2 & VPC](screenshots/04-aws-ec2-vpc-console.png)
-   *(Run `aws ec2 describe-instances` or AWS Web Console)*
-5. **AWS S3 Bucket Verification**:
-   ![S3 Bucket](screenshots/05-aws-s3-bucket-verify.png)
-   *(Run `aws s3 ls`)*
-6. **Infrastructure Teardown**:
-   ![Terraform Destroy](screenshots/06-terraform-destroy.png)
-   *(Run `terraform destroy`)*
+### Screenshots & Evidences:
+1. **AWS Identity & CLI Configuration**:
+   ![AWS Identity](screenshots/aws_sts_get-caller-identity.png)
+   ![AWS Config](screenshots/aws_configure_list.png)
+
+2. **Terraform Init, Format & Validate**:
+   ![Terraform Init & Validate](screenshots/terraform_init_fmt_validate.png)
+
+3. **Terraform Execution Plan**:
+   ![Terraform Plan](screenshots/terraform_plan_1.png)
+
+4. **Terraform Apply & Provisioning**:
+   ![Terraform Apply](screenshots/terraform_apply_1.png)
+
+5. **Terraform State List & Infrastructure Outputs**:
+   ![Terraform State & Outputs](screenshots/terraform_state_list_&_output.png)
+
 
 | Deliverable | Location | Status |
 | :--- | :--- | :---: |
