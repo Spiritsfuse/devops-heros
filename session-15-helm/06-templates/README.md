@@ -109,6 +109,11 @@ If `service.enabled` is `false` in values.yaml, this entire block is not generat
 helm template my-release template-demo
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm template`: Evaluates chart templates locally using default values (or specified values) and renders raw Kubernetes YAML manifests to standard output (STDOUT). Does NOT connect or communicate with any Kubernetes cluster.
+- `my-release`: The simulated Helm release name used to populate `{{ .Release.Name }}`.
+- `template-demo`: Path to the chart directory.
+
 Expected output (partial):
 
 ```text
@@ -133,6 +138,12 @@ Notice `{{ .Values.replicaCount }}` became `2`.
 helm template my-release template-demo --set replicaCount=5 | grep "replicas:"
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm template my-release template-demo`: Renders the chart manifests locally.
+- `--set replicaCount=5`: Overrides the value of `replicaCount` on the command line without modifying `values.yaml`.
+- `|` (Pipe): Streams the output of `helm template` into the next command.
+- `grep "replicas:"`: Filters the output to display only lines matching the string `"replicas:"` to quickly verify the template evaluation.
+
 Expected output:
 
 ```text
@@ -153,6 +164,15 @@ Expected output:
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **Go Templating:** The text templating engine built into Go and utilized by Helm (`{{ ... }}`) that dynamically injects variables, evaluates conditionals, and loops over lists before outputting Kubernetes manifests.
+- **Hyphen Trimming (`{{-` and `-}}`):** In Go templates, adding a dash (`-`) strips all whitespace and newlines from the left (`{{-`) or right (`-}}`), preventing illegal indentations and empty blank lines in YAML.
+- **Local Rendering:** Running `helm template` to inspect the generated YAML offline, catching templating errors before deploying to a live cluster.
+- **Pipelines / Functions (`| quote`):** Chaining commands inside Go template tags to transform data, such as quoting strings or base64-encoding secrets.
+
+---
+
 ## Reference
 
 * **Go templating in Helm:** https://helm.sh/docs/chart_template_guide/
+

@@ -37,6 +37,10 @@ Run:
 pip-audit
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `pip install pip-audit`: Installs the official Open Source Security Foundation (OpenSSF) Python dependency vulnerability auditor.
+- `pip-audit`: Audits Python environments or `requirements.txt` files by querying the Python Packaging Advisory Database (PyPA) and OSV (Open Source Vulnerabilities) service for known CVEs. Returns exit code 1 if known vulnerabilities are present.
+
 ## GitHub Actions
 
 ```yaml
@@ -79,9 +83,20 @@ Run tests
 Run SCA again
 ```
 
+---
+
+### 📚 Tech Jargons Demystified:
+- **SCA (Software Composition Analysis):** Identifying all third-party open-source libraries, transitive dependencies, and licenses inside an application to detect unpatched vulnerabilities.
+- **CVE (Common Vulnerabilities and Exposures):** A standardized dictionary of publicly known cybersecurity vulnerabilities tracked by MITRE (e.g. `CVE-2023-46136`).
+- **Transitive Dependency:** A dependency required by one of your direct dependencies (e.g. your app requires Flask, which requires Werkzeug; a vulnerability in Werkzeug is a transitive vulnerability).
+- **Remediation:** Patching vulnerable dependencies by bumping version constraints in `requirements.txt` to the patched upstream version.
+
+---
+
 ## Practice Questions
 
 1. Run `pip-audit` locally.
 2. Read the output.
 3. Identify package and version information.
 4. Explain how you would remediate a vulnerable dependency.
+

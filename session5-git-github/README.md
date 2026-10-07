@@ -1,5 +1,9 @@
 # Session 5 - Git & GitHub Homework Tasks
 
+## Student Information
+- **Name:** Dhruv Sharma
+- **Enrollment Number (Roll No):** 24BCS10294
+
 ## Task Overview
 This assignment covers advanced day-to-day Git operations divided into two primary tasks:
 1. **Task 1: `git commit -a -m` vs `git commit -m`**: Understanding staging mechanics and the distinction between standard commits and auto-staging tracked modifications.

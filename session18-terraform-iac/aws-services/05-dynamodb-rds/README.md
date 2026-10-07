@@ -120,3 +120,19 @@ aws rds create-db-snapshot \
   --db-instance-identifier production-db \
   --db-snapshot-identifier production-db-manual-backup-2026
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `aws dynamodb list-tables`: Queries the DynamoDB regional endpoint and returns all active NoSQL table names.
+- `aws dynamodb describe-table --table-name <name>`: Returns the table schema, partition key definition (`LockID` for Terraform state locking), item count, and billing mode.
+- `aws dynamodb put-item`: Inserts or overwrites a single document item in a DynamoDB table, using Typed Attribute JSON format (`"S"` for string, `"N"` for number).
+- `aws rds describe-db-instances`: Queries RDS for instance status (`available`, `modifying`, `backing-up`), database engine, and connection endpoint DNS hostname.
+- `aws rds create-db-snapshot`: Triggers an immediate point-in-time manual storage snapshot of the RDS instance that persists permanently until manual deletion.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **NoSQL vs RDBMS:** NoSQL databases (DynamoDB) use flexible schema models optimized for extreme horizontal scale and key-value lookups; RDBMS (RDS) enforces relational schemas with foreign keys and ACID transactions.
+- **Terraform State Locking (DynamoDB):** Using a DynamoDB table with partition key `LockID` so Terraform acquires an exclusive distributed lock before running `apply`, preventing two developers from corrupting state simultaneously.
+- **Multi-AZ Failover:** Automatic synchronous replication of the database to a secondary Availability Zone with automated failover in case of hardware or network disaster.
+- **Read Replica:** Asynchronous read-only copies of the primary database offloading read-heavy analytics or reporting traffic from the primary master database.
+

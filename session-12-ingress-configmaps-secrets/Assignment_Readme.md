@@ -1,9 +1,9 @@
-# Kubernetes Ingress, ConfigMaps & Secrets – Homework
+﻿# Kubernetes Ingress, ConfigMaps & Secrets - Homework
 
 **Name:** Dhruv Sharma
 **Roll No:** 24BCS10294
 
-Manifests are from the class repository ([session-12-ingress-configmaps-secrets/04-full-demo](https://github.com/Nency-Ravaliya/devops-heros/tree/main/session-12-ingress-configmaps-secrets/04-full-demo)) and are copied into [manifests/](manifests). I ran them on my local kind cluster. All outputs are copied from my terminal.
+Manifests are from the class repository ([session-12-ingress-configmaps-secrets/04-full-demo](https://github.com/Spiritsfuse/devops-heros/tree/main/session-12-ingress-configmaps-secrets/04-full-demo)) and are copied into [manifests/](manifests). I ran them on my local kind cluster. All outputs are copied from my terminal.
 
 | Object | Purpose |
 |---|---|

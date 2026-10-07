@@ -18,6 +18,9 @@ If `kubectl get` tells us:
 kubectl apply -f pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pod.yaml`: Deploys the demonstration pod defined in `pod.yaml`.
+
 Expected output:
 
 ```text
@@ -39,6 +42,9 @@ Run:
 ```bash
 kubectl describe pod describe-demo
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe pod describe-demo`: Fetches detailed live runtime configuration and status from the API server. Unlike `kubectl get`, `describe` merges multiple API objects (Pod, Node, Events, VolumeMounts) into a human-readable diagnostic report.
 
 The output contains many sections. Important sections include:
 
@@ -134,6 +140,11 @@ kubectl describe service <service-name>
 kubectl describe node <node-name>
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe deployment`: Reveals deployment rollout strategy, replica set revisions, and scaling conditions (`Progressing`, `Available`).
+* `kubectl describe service`: Lists matched pod IP endpoints, session affinity settings, and load balancer provisioning events.
+* `kubectl describe node`: Displays allocated vs capacity CPU/memory percentages, node taints, and daemon conditions (`MemoryPressure`, `DiskPressure`, `NetworkUnavailable`).
+
 ---
 
 ## Troubleshooting Habit
@@ -180,3 +191,21 @@ kubectl describe
 
 * **Kubernetes Pod Lifecycle:**  
   https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Pod Conditions:**
+  * `PodScheduled`: The pod was assigned to a node.
+  * `Initialized`: All init containers have completed successfully.
+  * `ContainersReady`: All containers in the pod are ready.
+  * `Ready`: The pod is capable of serving requests and should be added to matching Services.
+* **Container State Lifecycle:**
+  * `Waiting`: Pulling images or waiting for volumes.
+  * `Running`: Process is active.
+  * `Terminated`: Container finished execution or crashed.
+* **Exit Codes:**
+  * `0`: Normal completion / successful exit.
+  * `1` or `2`: Application threw an unhandled error / missing config.
+  * `137`: SIGKILL (`128 + 9`), typically OOMKilled (Out Of Memory) when exceeding container memory limits.
+  * `143`: SIGTERM (`128 + 15`), graceful shutdown signal from Kubernetes.

@@ -97,10 +97,16 @@ spec:
 kubectl apply -f 04-externalname/service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f`: Submits the declarative Service manifest. Because `type: ExternalName` is specified, Kubernetes does not allocate a VIP (Virtual IP) from the service CIDR or create iptables rules. It registers a DNS CNAME record directly in CoreDNS.
+
 Inspect the service:
 ```bash
 kubectl get svc external-database-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get svc external-database-service`: Displays the service record. Note that `CLUSTER-IP` shows `<none>` while `EXTERNAL-IP` displays the target external FQDN (`api.github.com`).
 
 Expected Output:
 ```text
@@ -114,16 +120,29 @@ Notice that `CLUSTER-IP` is `<none>` and `EXTERNAL-IP` is `api.github.com`.
 kubectl apply -f 04-externalname/client-pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `apply -f .../client-pod.yaml`: Deploys an interactive network debugging pod (such as `busybox` or `curlimages/curl`) outfitted with CLI diagnostic utilities like `nslookup`, `dig`, and `curl`.
+
 Wait until running:
 ```bash
 kubectl get pod dns-test-client
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get pod dns-test-client`: Verifies that the container image is pulled and the pod reaches `Running` status before attempting interactive execution.
 
 ### Step 3: Verify DNS CNAME Resolution
 Execute `nslookup` inside the test pod:
 ```bash
 kubectl exec -it dns-test-client -- nslookup external-database-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl exec`: Executes a command in an already running container inside a pod.
+* `-it`: Combines `-i` (`--stdin`, keeps standard input open) and `-t` (`--tty`, allocates a pseudo-terminal/TTY for terminal rendering).
+* `dns-test-client`: The target pod to run the command inside.
+* `--`: Double-dash delimiter separating kubectl arguments from the container command to be run.
+* `nslookup external-database-service`: Queries the internal CoreDNS server (usually at `10.96.0.10:53`) to resolve the domain name. It returns a `CNAME` pointing to `api.github.com`.
 
 Expected Output:
 ```text
@@ -140,6 +159,12 @@ Notice how CoreDNS returned `canonical name = api.github.com`!
 ```bash
 kubectl exec -it dns-test-client -- curl -s -H "Host: api.github.com" https://external-database-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `curl`: Utility to transfer data to or from a network server using protocols like HTTP/HTTPS.
+* `-s`: Silent mode. Suppresses curl's progress meter and error messages for clean JSON output.
+* `-H "Host: api.github.com"`: Injects an HTTP `Host` header. This is critical for HTTPS endpoints hosted behind CDNs or multi-tenant servers: the external server verifies the TLS SNI and Host header to route the request to the correct virtual host (`api.github.com`).
+* `https://external-database-service`: Initiates the secure TLS handshake using the internal Kubernetes service name, which CoreDNS resolves to GitHub's public IP address.
 
 Expected Output (GitHub API JSON):
 ```json
@@ -165,3 +190,14 @@ Expected Output (GitHub API JSON):
 kubectl delete -f 04-externalname/client-pod.yaml
 kubectl delete -f 04-externalname/service.yaml
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete -f`: Cleans up the test client pod and deletes the ExternalName Service definition from the cluster's CoreDNS records.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **CNAME (Canonical Name):** A DNS record type that aliases one domain name to another canonical domain name instead of mapping directly to an IP address (`A` record).
+* **CoreDNS:** The default, high-performance, internal DNS server running in Kubernetes (`kube-system` namespace) that automatically manages domain records for Services, Pods, and external aliases.
+* **SNI (Server Name Indication):** An extension to the TLS protocol where the client indicates which hostname it is attempting to connect to at the start of the handshake, allowing one web server to serve multiple HTTPS websites on a single IP address.
+* **No-Selector Service:** A standard Kubernetes Service created without a `spec.selector`. It gives you a stable internal `ClusterIP` but lets you manually bind an `Endpoints` or `EndpointSlice` object to route traffic to arbitrary external IP addresses.

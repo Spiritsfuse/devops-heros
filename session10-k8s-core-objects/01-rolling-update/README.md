@@ -79,10 +79,19 @@ kubectl apply -f 01-rolling-update/deployment-v1.yaml
 kubectl apply -f 01-rolling-update/service.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `kubectl apply -f <path>`: Declaratively submits the `Deployment` and `Service` specs to Kubernetes. If they don't exist, Kubernetes creates them; if they exist, it calculates a 3-way merge diff.
+- `deployment-v1.yaml`: Launches the initial ReplicaSet with 4 replicas running nginx 1.24 tagged with label `version=v1`.
+- `service.yaml`: Creates a NodePort service routing traffic on port 30010 to pods matching label `app: app-rolling`.
+
 Wait for all pods to be ready:
 ```bash
 kubectl rollout status deployment/app-rolling
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `rollout status`: Blocks the terminal and actively monitors the deployment controller until all desired replicas reach the `Ready` condition.
+- In automation and CI/CD pipelines, running `kubectl rollout status` is crucial—it halts the pipeline if a rollout stalls or crashes instead of blindly declaring success.
 
 Expected output:
 ```text
@@ -93,6 +102,11 @@ Check pods and their version label:
 ```bash
 kubectl get pods -l app=app-rolling --show-labels
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get pods`: Lists pod objects in the active namespace.
+- `-l app=app-rolling` (or `--selector`): Filters pods by label query. Only pods with label key `app` and value `app-rolling` are displayed.
+- `--show-labels`: Appends a dedicated `LABELS` column at the end of the output table, making it easy to confirm that all 4 pods have `version=v1`.
 
 Expected output:
 ```text
@@ -111,12 +125,21 @@ curl http://$(minikube ip):30010
 minikube service app-rolling-service --url
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `$(minikube ip)`: Command substitution in Bash. Executes `minikube ip` to dynamically retrieve the internal VM/Docker IP address of the Minikube node.
+- `curl http://...:30010`: Sends an HTTP GET request to the NodePort exposed on the Minikube node.
+- `minikube service app-rolling-service --url`: Queries Minikube's network proxy to output the directly clickable URL for accessing the NodePort service.
+
 Expected: Page shows `VERSION: v1` with a dark background.
 
 ### Step 3: Trigger the Rolling Update to v2
 ```bash
 kubectl apply -f 01-rolling-update/deployment-v2.yaml
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- Modifies the pod template image to nginx 1.25 and updates labels to `version=v2`.
+- Because the pod template spec changed, Kubernetes triggers the **RollingUpdate** strategy, creating a new ReplicaSet alongside the old one.
 
 ### Step 4: Watch the Rollout Happen in Real Time (Run in a separate terminal)
 ```bash
@@ -126,6 +149,16 @@ kubectl get pods -l app=app-rolling -w
 # Terminal B: Keep curling the service continuously — zero errors!
 while true; do curl -s http://$(minikube ip):30010 | grep VERSION; sleep 1; done
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `kubectl get pods -l app=app-rolling -w`:
+  - `-w` (or `--watch`): Streams pod creation, probe checking, and termination events in real time.
+- `while true; do ... sleep 1; done`:
+  - An infinite Bash loop simulating real-time user traffic.
+  - `curl -s`: Silent mode (suppresses progress meters and error messages).
+  - `| grep VERSION`: Filters output to only display the application version HTML line.
+  - `sleep 1`: Delays 1 second between requests.
+  - **Theory Connection**: Proves zero downtime. Traffic transitions from 100% v1 to a mix of v1/v2 to 100% v2 without a single HTTP 503 error!
 
 Expected pod watch output (you will see v1 pods Terminating as v2 pods start):
 ```text
@@ -169,6 +202,10 @@ All pods now show `version=v2`.
 kubectl rollout history deployment/app-rolling
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `rollout history`: Queries the underlying ReplicaSets associated with the deployment to display past deployment revisions.
+- Each revision represents a distinct pod template hash (`pod-template-hash`).
+
 Expected output:
 ```text
 deployment.apps/app-rolling
@@ -181,6 +218,10 @@ REVISION  CHANGE-CAUSE
 ```bash
 kubectl rollout undo deployment/app-rolling
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `rollout undo`: Instantly initiates a reverse rolling update back to the previous stable revision (Revision 1).
+- Can target a specific revision using `--to-revision=<number>` (e.g. `kubectl rollout undo deployment/app-rolling --to-revision=1`).
 
 Expected output:
 ```text
@@ -200,3 +241,14 @@ kubectl get pods -l app=app-rolling --show-labels
 kubectl delete -f 01-rolling-update/service.yaml
 kubectl delete -f 01-rolling-update/deployment-v1.yaml
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `delete -f`: Gracefully terminates the Service endpoint and drains all active pods managed by the Deployment.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **maxSurge**: The maximum number of extra pods that can be scheduled above the desired replica count during an update (e.g. `maxSurge: 1` on 4 pods allows up to 5 pods).
+- **maxUnavailable**: The maximum number of pods that can be unavailable during the update (e.g. `maxUnavailable: 0` ensures service capacity never drops below 100%).
+- **Readiness Probe**: A health check mechanism Kubernetes uses to determine if a newly created container is ready to accept incoming network traffic.
+- **ReplicaSet Controller**: The underlying Kubernetes controller that ensures a specified number of identical pod replicas are running at any given time.

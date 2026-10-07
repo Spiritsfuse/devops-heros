@@ -28,6 +28,10 @@
 python3 app/calculator.py
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `python3`: Invokes the Python 3 interpreter.
+- `app/calculator.py`: Path to the Python script to execute directly in the console.
+
 **Expected:**
 ```text
 Calculator Application
@@ -46,6 +50,11 @@ Calculator Application
 python3 -m pip install -r requirements.txt
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `python3 -m pip`: Runs the `pip` package manager module using the specific `python3` binary in PATH to avoid global environment mix-ups.
+- `install`: Subcommand to download and install packages.
+- `-r requirements.txt`: Specifies the requirements manifest file containing pinned library versions (e.g. `pytest>=7.0.0`).
+
 ---
 
 ## 4. Run Tests
@@ -53,6 +62,10 @@ python3 -m pip install -r requirements.txt
 ```bash
 pytest -v
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `pytest`: Python testing framework and test runner.
+- `-v` (or `--verbose`): Verbose mode. Lists each individual test function name and file along with its execution result (`PASSED` / `FAILED`) instead of a single dot.
 
 **Expected:**
 ```text
@@ -72,6 +85,10 @@ tests/test_calculator.py::test_divide_by_zero PASSED
 chmod +x build.sh
 ./build.sh
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `chmod +x build.sh`: Grants execution permission on the shell build script.
+- `./build.sh`: Runs the build script in the current directory to create deployable bundle assets.
 
 **Expected:**
 ```text
@@ -182,3 +199,12 @@ git push
 A CI pipeline automatically validates code before it moves forward.
 
 > **Code** → **Build** → **Test** → **Artifact**
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Unit Testing:** Automated tests that verify individual units of source code (such as isolated functions or methods in `calculator.py`) in complete isolation.
+- **Assertion:** A boolean statement inside a test function asserting that expected output equals actual output; an assertion failure halts execution and flags the test as FAILED.
+- **Exit Code:** A numeric status returned by a program upon termination (0 for success, non-zero e.g. 1 for failure). CI tools like GitHub Actions rely exclusively on exit codes to determine pass or fail.
+- **Continuous Integration Pipeline:** An automated series of steps combining code checkout, runtime setup, dependency resolution, test execution, and artifact packaging.
+

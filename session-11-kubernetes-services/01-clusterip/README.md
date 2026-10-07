@@ -133,10 +133,17 @@ spec:
 kubectl apply -f 01-clusterip/app-deployment.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `apply -f`: Declaratively schedules 3 Nginx pods across the cluster worker nodes with labels `app=web-clusterip`.
+
 Verify the 3 pods are running and note their private IPs:
 ```bash
 kubectl get pods -l app=web-clusterip -o wide
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `-l app=web-clusterip`: Filters the display to only the web pods.
+- `-o wide`: Exposes the assigned container network IPs (`10.244.x.x`) and node assignments.
 
 Expected Output:
 ```text
@@ -151,10 +158,16 @@ web-app-clusterip-6c679b9456-r8f5q    1/1     Running   0          18s   10.244.
 kubectl apply -f 01-clusterip/service.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- Allocates a virtual ClusterIP (`10.96.150.45`) and registers service discovery DNS records in CoreDNS.
+
 Verify the service and its allocated ClusterIP:
 ```bash
 kubectl get svc web-service-clusterip
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get svc`: Lists service details, confirming that `PORT(S)` exposes `8080/TCP` internally.
 
 Expected Output:
 ```text
@@ -167,6 +180,9 @@ Verify that the Service has bound to all 3 pod IP addresses:
 ```bash
 kubectl get endpoints web-service-clusterip
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get endpoints`: Shows that the service selector resolved all 3 pod IP addresses and attached port 80.
 
 Expected Output:
 ```text
@@ -196,15 +212,25 @@ Test 1: Query by Service Name (CoreDNS resolution):
 kubectl exec -it curl-client -- curl -s http://web-service-clusterip:8080
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `exec -it curl-client --`: Runs `curl` inside the container.
+- `http://web-service-clusterip:8080`: CoreDNS resolves `web-service-clusterip` to the ClusterIP `10.96.150.45`, which `kube-proxy` transparently load balances to one of the 3 backend pods.
+
 Test 2: Query by Service IP:
 ```bash
 kubectl exec -it curl-client -- curl -s http://10.96.150.45:8080
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- Tests direct Layer 4 routing using the virtual ClusterIP address, bypassing DNS resolution.
+
 Test 3: Query by Fully Qualified Domain Name (FQDN):
 ```bash
 kubectl exec -it curl-client -- curl -s http://web-service-clusterip.default.svc.cluster.local:8080
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- Queries using the complete cluster FQDN. Essential for cross-namespace communication (e.g. `service.other-namespace.svc.cluster.local`).
 
 Expected Output (Nginx HTML):
 ```html
@@ -224,6 +250,9 @@ To view the web page directly in your laptop's browser:
 ```bash
 kubectl port-forward svc/web-service-clusterip 8080:8080
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `port-forward svc/... 8080:8080`: Establishes an encrypted TCP bridge from `localhost:8080` directly to port 8080 on the Kubernetes service.
 
 Open your browser and navigate to:
 ```text
@@ -247,3 +276,13 @@ kubectl delete -f 01-clusterip/client-pod.yaml
 kubectl delete -f 01-clusterip/service.yaml
 kubectl delete -f 01-clusterip/app-deployment.yaml
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `delete -f`: Safely removes client test pod, service, and backend deployment.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Virtual IP (VIP)**: An IP address managed in memory by `kube-proxy` that does not correspond to any physical network interface; traffic sent to a VIP is rewritten by iptables/IPVS to point to real Pod IPs.
+- **Service Discovery**: The automatic detection of devices and services offered by an application over a network without hardcoded IP configurations.
+- **Layer 4 Load Balancing**: Traffic distribution based on IP address and port (TCP/UDP) rather than application payload headers (Layer 7).

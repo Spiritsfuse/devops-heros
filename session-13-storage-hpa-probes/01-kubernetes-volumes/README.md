@@ -176,3 +176,40 @@ spec:
 | **`hostPath`** | Node Filesystem | Node lifetime | No (tied to 1 node) | Manual |
 | **Static `PV / PVC`** | Cluster Admin | Independent of Pod | Depends on CSI driver | Manual |
 | **Dynamic `StorageClass`** | Storage Provisioner | Independent of Pod | Depends on CSI driver | Fully Automated |
+
+---
+
+## 6. Hands-On Verification & Inspection Commands
+
+```bash
+# 1. List all PersistentVolumes and PersistentVolumeClaims
+kubectl get pv,pvc
+
+# 2. Check PVC binding status and volume details
+kubectl describe pvc app-pvc
+
+# 3. View available cluster StorageClasses
+kubectl get storageclass
+
+# 4. Verify data sharing across containers inside an emptyDir Pod
+kubectl exec -it emptydir-demo -c reader -- cat /cache/data.txt
+```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pv,pvc`: Compares physical/cloud storage assets (`PV`) against developer claims (`PVC`). Checks the `STATUS` column to verify that claims show `Bound` rather than `Pending` or `Lost`.
+* `kubectl describe pvc app-pvc`: Inspects the claim lifecycle, showing requested capacity, access modes, matching PV volume name, and controller events (e.g. provisioner timeouts or insufficient volume size).
+* `kubectl get storageclass` (alias `kubectl get sc`): Lists registered dynamic CSI storage provisioners, default storage classes (marked with `(default)`), and volume binding modes.
+* `kubectl exec -it emptydir-demo -c reader -- cat /cache/data.txt`:
+  * `-c reader`: Directs the exec call to the `reader` container in a multi-container pod.
+  * `cat /cache/data.txt`: Reads the file written by the sibling `writer` container, proving that `emptyDir` enables local shared RAM/disk communication across containers in the same Pod.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **CSI (Container Storage Interface):** An industry-standard specification allowing third-party storage vendors (AWS EBS, GCP Persistent Disk, Azure Disk, Ceph, Portworx) to write plugins for Kubernetes without modifying core Kubernetes source code.
+* **PersistentVolumeReclaimPolicy:**
+  * `Retain`: When a PVC is deleted, the underlying PV and disk data remain intact for manual administrator recovery.
+  * `Delete`: When a PVC is deleted, the backend cloud storage asset (e.g., AWS EBS volume) is automatically destroyed.
+* **volumeBindingMode:**
+  * `Immediate`: Storage is provisioned immediately upon PVC creation before knowing which node the pod will run on.
+  * `WaitForFirstConsumer`: Postpones storage provisioning and binding until a Pod consuming the PVC is actually scheduled, guaranteeing the storage volume is created in the exact same Availability Zone (AZ) as the worker node.

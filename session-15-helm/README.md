@@ -78,6 +78,19 @@ helm rollback my-release 1
 helm uninstall my-release
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `curl ... | bash`: Fetches the official installation script and installs the standalone `helm` binary into `/usr/local/bin`.
+* `helm create <name>`: Scaffolds a complete standard Helm chart directory structure including `Chart.yaml`, `values.yaml`, and sample Nginx deployment/service templates.
+* `helm template <release> <chart>`: Dry-run template engine. Evaluates Go templates against values files and prints raw rendered Kubernetes YAML manifests to stdout without requiring an active Kubernetes cluster connection.
+* `helm lint <chart>`: Static analysis tool. Scans the chart for syntax errors, missing mandatory fields, and template discrepancies according to Helm best practice standards.
+* `helm install <release-name> <chart>`: Renders templates and sends them to `kube-apiserver`, creating release metadata stored as an encrypted Kubernetes Secret in the target namespace.
+* `-f values-prod.yaml`: Flag `-f` (`--values`) merges an environment-specific YAML configuration file, overriding default values specified in `values.yaml`.
+* `helm list` (alias `helm ls`): Lists all deployed releases across the namespace showing current revision number, update timestamp, status (`deployed`, `failed`), chart version, and app version.
+* `helm upgrade <release> <chart> --set key=value`: Performs a delta upgrade. The `--set` flag overrides specific configuration variables directly from CLI at runtime.
+* `helm history <release>`: Dumps the release audit trail showing past revision integers, deployment timestamps, statuses, and descriptive notes.
+* `helm rollback <release> [revision]`: Reverts the cluster resources to the exact state captured by the specified previous revision number without needing to rebuild or reapply YAML.
+* `helm uninstall <release>`: Purges all Kubernetes resources created by the release and deletes the release state secrets.
+
 ---
 
 ## Helm 2 vs Helm 3
@@ -125,3 +138,13 @@ A: Inspect helm secrets with kubectl get secrets -l owner=helm. Find the stuck p
 * **Helm Documentation:** https://helm.sh/docs/
 * **Helm Chart Template Guide:** https://helm.sh/docs/chart_template_guide/
 * **Helm CLI Reference:** https://helm.sh/docs/helm/
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Chart vs Release:**
+  * **Chart:** A packaged bundle of YAML template files and metadata (`Chart.yaml`).
+  * **Release:** A specific instantiated instance of a Chart running inside a Kubernetes cluster with its own unique release name and revision history.
+* **Values File Precedence:** Values are merged with strict precedence: CLI `--set` overrides environment file `-f custom-values.yaml`, which overrides the chart's base `values.yaml`.
+* **Helm 3 Release Secrets:** Helm 3 maintains release states inside Kubernetes Secrets named `sh.helm.release.v1.<release-name>.v<revision>` in the target namespace labeled with `owner: helm`.
+* **Go Templating:** The syntax used in Helm templates (`{{ .Values.image.repository }}`) derived from Go's `text/template` library, supporting logic control (`if/else`, `range`, `with`) and pipeline functions (Sprig library: `quote`, `default`, `indent`).

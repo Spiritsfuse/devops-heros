@@ -1,9 +1,9 @@
-# Session 14: Kubernetes Troubleshooting – Assignment
+# Session 14: Kubernetes Troubleshooting - Assignment
 
 ## Student Information
 - **Name:** Dhruv Sharma
 - **Enrollment Number (Roll No):** 24BCS10294
-- **Session:** Session 14 – Kubernetes Troubleshooting & Diagnostic Playbooks
+- **Session:** Session 14 - Kubernetes Troubleshooting & Diagnostic Playbooks
 - **Repository:** `devops-heros/session-14-kubernetes-troubleshooting`
 
 ---
@@ -70,18 +70,18 @@ Applying the troubleshooting test manifests in terminal:
 kubectl apply -f 01-kubectl-get/
 kubectl get pods -w
 ```
-![kubectl apply command in terminal](screenshots/image-2.png)
+![kubectl apply and get wide](screenshots/01-kubectl-apply-and-get-wide.png)
 
 #### 2. Pod Lifecycle Observation under Watch Mode
 Observing transition states (`Pending` -> `ContainerCreating` -> `Running`):
-![output in terminal with watch](screenshots/image-1.png)
+![kubectl watch pod lifecycle](screenshots/03-kubectl-watch-pod-termination.png)
 
 #### 3. Pod Deletion & Graceful Teardown (`kubectl delete pod`)
 Deleting pods from a parallel terminal and verifying termination:
 ```bash
 kubectl delete pod <pod-name> --now
 ```
-![delete pods command in another terminal](screenshots/image.png)
+![delete pods command](screenshots/02-kubectl-delete-pod.png)
 
 ---
 
@@ -237,6 +237,6 @@ endpoints/web-service    10.244.1.18:80,10.244.1.19:80
 | Deliverable | Path | Status |
 | :--- | :--- | :---: |
 | Troubleshooting Commands Guide | Section 1.1 | Verified |
-| Hands-on Command Screenshots | `screenshots/image-2.png`, `image-1.png`, `image.png` | Verified |
+| Hands-on Command Screenshots | `screenshots/01-kubectl-apply-and-get-wide.png`, `02-kubectl-delete-pod.png`, `03-kubectl-watch-pod-termination.png` | Verified |
 | Common Issues Troubleshooting Playbook | Section 2.1 to 2.7 | Verified |
 | Mini-Project Implementation & Fixes | [mini-project/](file:///c:/Users/ADMIN/devops-heros/session-14-kubernetes-troubleshooting/mini-project) | Verified |

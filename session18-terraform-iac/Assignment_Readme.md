@@ -1,9 +1,9 @@
-# Session 18: Terraform & Infrastructure as Code (IaC)
+﻿# Session 18: Terraform & Infrastructure as Code (IaC)
 
 ## Student Information
 - **Name:** Dhruv Sharma
 - **Enrollment Number (Roll No):** 24BCS10294
-- **Session:** Session 18 – Terraform & Infrastructure as Code + AWS Fundamentals
+- **Session:** Session 18 - Terraform & Infrastructure as Code + AWS Fundamentals
 - **Repository:** `devops-heros/session18-terraform-iac`
 
 ---
@@ -24,11 +24,11 @@
      - [Step 8: Infrastructure Teardown & Destruction](#step-8-infrastructure-teardown--destruction)
    - [2.4 Terraform Lifecycle Flow & State Management](#24-terraform-lifecycle-flow--state-management)
 3. [Task 2: Comprehensive AWS Core Services Research](#task-2-comprehensive-aws-core-services-research)
-   - [3.1 IAM – Governance & Identity Security](#31-iam--governance--identity-security)
-   - [3.2 EC2 – Elastic Compute Cloud](#32-ec2--elastic-compute-cloud)
-   - [3.3 S3 – Simple Storage Service](#33-s3--simple-storage-service)
-   - [3.4 VPC – Virtual Private Cloud Networking](#34-vpc--virtual-private-cloud-networking)
-   - [3.5 DynamoDB & RDS – Cloud Database Services](#35-dynamodb--rds--cloud-database-services)
+   - [3.1 IAM - Governance & Identity Security](#31-iam--governance--identity-security)
+   - [3.2 EC2 - Elastic Compute Cloud](#32-ec2--elastic-compute-cloud)
+   - [3.3 S3 - Simple Storage Service](#33-s3--simple-storage-service)
+   - [3.4 VPC - Virtual Private Cloud Networking](#34-vpc--virtual-private-cloud-networking)
+   - [3.5 DynamoDB & RDS - Cloud Database Services](#35-dynamodb--rds--cloud-database-services)
 4. [Deliverables Verification Checklist](#deliverables-verification-checklist)
 
 ---
@@ -339,7 +339,7 @@ As required by the assignment guidelines, detailed standalone reference guides h
 
 ---
 
-### 3.1 IAM – Governance & Identity Security
+### 3.1 IAM - Governance & Identity Security
 **AWS Identity and Access Management (IAM)** is a global web service that controls authentication and authorization across all AWS API endpoints.
 
 ```text
@@ -379,7 +379,7 @@ As required by the assignment guidelines, detailed standalone reference guides h
 
 ---
 
-### 3.2 EC2 – Elastic Compute Cloud
+### 3.2 EC2 - Elastic Compute Cloud
 **Amazon EC2** delivers scalable, on-demand virtual compute servers in the AWS cloud.
 
 - **Amazon Machine Image (AMI)**: Pre-packaged template containing the operating system, packages, and configurations (e.g., Ubuntu 24.04 LTS).
@@ -398,7 +398,7 @@ As required by the assignment guidelines, detailed standalone reference guides h
 
 ---
 
-### 3.3 S3 – Simple Storage Service
+### 3.3 S3 - Simple Storage Service
 **Amazon S3** is an object storage service engineered for 99.999999999% (11 9's) durability.
 
 - **Buckets**: Top-level containers with globally unique DNS names created in specific regions.
@@ -418,7 +418,7 @@ As required by the assignment guidelines, detailed standalone reference guides h
 
 ---
 
-### 3.4 VPC – Virtual Private Cloud Networking
+### 3.4 VPC - Virtual Private Cloud Networking
 **Amazon VPC** is a logically isolated virtual network dedicated to your AWS account.
 
 - **CIDR Blocks**: Classless Inter-Domain Routing range (e.g., `10.0.0.0/16` provides 65,536 private IPs).
@@ -443,7 +443,7 @@ As required by the assignment guidelines, detailed standalone reference guides h
 
 ---
 
-### 3.5 DynamoDB & RDS – Cloud Database Services
+### 3.5 DynamoDB & RDS - Cloud Database Services
 
 ```text
 +------------------------------------+------------------------------------+

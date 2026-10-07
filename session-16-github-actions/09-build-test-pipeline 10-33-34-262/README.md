@@ -192,6 +192,14 @@ flake8 app.py tests/
 pytest tests/ --junitxml=test-results/results.xml --cov=app --cov-report=term-missing
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `pip install -r requirements.txt`: Installs application runtime and testing libraries (`pytest`, `pytest-cov`, `flake8`).
+- `flake8 app.py tests/`: Static code linter that inspects syntax, PEP 8 styling conventions, unresolved imports, and complexity issues without executing code.
+- `pytest tests/`: Runs unit tests located in the `tests/` directory.
+- `--junitxml=test-results/results.xml`: Outputs machine-readable XML results for CI metrics integration.
+- `--cov=app`: Measures test code coverage for the `app` module.
+- `--cov-report=term-missing`: Prints line numbers in the terminal output corresponding to statements that were never executed during testing.
+
 Expected output:
 
 ```text
@@ -303,9 +311,18 @@ Artifacts uploaded
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **Linting (`flake8`):** Static code analysis checking adherence to style standards (PEP 8) and spotting common programming flaws before running the program.
+- **Code Coverage (`pytest-cov`):** A percentage metric identifying how much of your production code is actually exercised by your test suite.
+- **Always Conditional (`if: always()`):** A GitHub Actions condition ensuring a step executes even if preceding steps in the job failed (vital for saving test reports and failure diagnostic logs).
+- **Test Matrix vs Multi-Stage CI:** Multi-stage CI establishes distinct quality gates (lint must pass before tests run, tests must pass before build/artifact generation).
+
+---
+
 ## Reference
 
 * **actions/checkout:** https://github.com/actions/checkout
 * **actions/setup-python:** https://github.com/actions/setup-python
 * **pytest documentation:** https://docs.pytest.org/
 * **flake8 documentation:** https://flake8.pycqa.org/
+

@@ -258,6 +258,11 @@ aws ec2 describe-route-tables \
   --query 'RouteTables[].{RouteTableId:RouteTableId,VpcId:VpcId}'
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `aws ec2 describe-vpcs`: Filters VPCs by tag `Name=session19-vpc` and extracts only the VPC ID, CIDR block, and state using JMESPath projections.
+- `aws ec2 describe-subnets`: Queries subnets filtered by name tag and extracts the subnet ID, CIDR (`10.0.1.0/24`), and assigned Availability Zone.
+- `aws ec2 describe-route-tables`: Queries route tables, verifying association with the newly created VPC.
+
 ---
 
 # Step 10 - Destroy
@@ -312,6 +317,14 @@ AWS API
 ```
 
 Terraform is the translator between our infrastructure code and the cloud APIs.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Route Table Association (`aws_route_table_association`):** The explicit glue binding a subnet to a specific route table, determining whether traffic originating from that subnet routes to the internet or stays local.
+- **CIDR Block Replacement:** Modifying the primary `cidr_block` of a VPC forces resource re-creation (`-/+`), destroying all child subnets, route tables, and gateways.
+- **Dry-Run (`terraform plan`):** Calculating the topological dependency graph and querying cloud APIs to compute differences without altering live cloud resources.
+- **Security Group Ingress/Egress:** Ingress rules filter incoming packet traffic; egress rules control outgoing connections initiated from instances inside the security group.
 
 ---
 

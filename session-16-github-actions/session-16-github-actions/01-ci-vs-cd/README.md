@@ -94,6 +94,11 @@ git commit -m "Update application"
 git push
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `git add .`: Stages all newly created, modified, and deleted files in the working directory into Git's staging index.
+- `git commit -m "Update application"`: Packages staged snapshots into a permanent commit on the current branch with the descriptive log message `"Update application"`.
+- `git push`: Uploads local commits to the upstream remote repository on GitHub, which fires webhook events that trigger the CI pipeline.
+
 The CI system automatically:
 **Checkout** → **Build** → **Test**
 
@@ -109,3 +114,11 @@ If everything passes:
 
 * CI makes sure the code is healthy.
 * CD automates getting that healthy code toward users.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Continuous Integration (CI):** Automating the integration of code changes from multiple contributors into a shared codebase with immediate automated builds and test executions.
+- **Continuous Delivery (CD):** Ensuring every build passing automated tests is packaged, artifacted, and ready for deployment to staging or production with a single manual trigger/approval.
+- **Continuous Deployment (CD):** An extension of continuous delivery where every passing build is deployed straight to production automatically with zero human gatekeeping.
+- **Feedback Loop:** The duration of time it takes for a developer to know if their newly pushed commit introduced a bug or broke a build. Shorter loops dramatically reduce debugging costs.

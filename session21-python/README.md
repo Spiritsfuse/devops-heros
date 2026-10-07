@@ -1,4 +1,10 @@
-# Session 21 — DevOps Final Capstone: TaskBoard (Python)
+# Session 21 - DevOps Final Capstone: TaskBoard (Python)
+
+## Student Information
+- **Name:** Dhruv Sharma
+- **Enrollment Number (Roll No):** 24BCS10294
+- **Session:** Session 21 - Final DevOps Project & Capstone
+- **Homework Submission Document:** [Assignment_Readme.md](Assignment_Readme.md)
 
 ## 1. What we are building
 
@@ -85,7 +91,7 @@ session21-devops-capstone-final/
 
 ---
 
-# PART A — UNDERSTAND THE APPLICATION
+# PART A  -  UNDERSTAND THE APPLICATION
 
 ## 3. Frontend
 
@@ -144,7 +150,7 @@ Prometheus needs machine-readable metrics. The FastAPI Prometheus instrumentator
 
 ---
 
-# PART B — RUN IT LOCALLY
+# PART B  -  RUN IT LOCALLY
 
 ## 5. Fastest method: Docker Compose
 
@@ -158,6 +164,13 @@ Run:
 ```bash
 docker compose up --build
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `docker compose up`: Reads `docker-compose.yml`, provisions networking bridges, sets up volumes, and starts all multi-container services (`frontend`, `backend`, `db`) in dependency order.
+- `--build`: Forces Docker Compose to rebuild container images from local Dockerfiles even if matching images already exist in the local cache, ensuring code changes are incorporated.
+- `-d` (optional flag e.g. `docker compose up -d --build`): "Detached mode". Runs containers in the background, freeing your terminal prompt.
+- `docker compose down`: Gracefully stops and deletes active containers, networks, and internal DNS entries created by `up`.
+- `-v` (in `docker compose down -v`): "Volumes". Deletes named Docker persistent storage volumes (e.g. `postgres_data`), wiping database state for a completely fresh start.
 
 Open:
 
@@ -213,11 +226,20 @@ Run migrations:
 alembic upgrade head
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `alembic upgrade head`: Executes all unapplied database schema migration scripts in sequence up to the latest revision (`head`), creating tables and indexes in PostgreSQL.
+
 Start FastAPI:
 
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `uvicorn`: High-performance ASGI web server for asynchronous Python web applications.
+- `app.main:app`: Looks inside `app/main.py` for the FastAPI instance named `app`.
+- `--reload`: Hot-reload flag; automatically detects file changes and restarts worker processes instantly during development.
+- `--port 8000`: Binds the server to listen on TCP port 8000.
 
 Test:
 
@@ -234,7 +256,7 @@ http://localhost:8000/docs
 
 ---
 
-# PART C — TESTING
+# PART C  -  TESTING
 
 ## 7. Pytest
 
@@ -259,7 +281,7 @@ This is the first quality gate.
 
 ---
 
-# PART D — GIT AND GITHUB
+# PART D  -  GIT AND GITHUB
 
 ## 8. Initialize Git
 
@@ -282,7 +304,7 @@ Explain:
 
 ---
 
-# PART E — DOCKER
+# PART E  -  DOCKER
 
 ## 9. Backend Dockerfile
 
@@ -303,6 +325,11 @@ Build:
 docker build -t taskboard-backend:local ./backend
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `docker build`: Directs Docker Engine to read the `Dockerfile` inside the target directory and assemble a container image layer-by-layer.
+- `-t taskboard-backend:local`: Sets a human-readable tag (`<repository>:<tag>`) to identify the resulting image in your local Docker cache.
+- `./backend`: The **build context** directory sent to the Docker daemon. All files referenced by `COPY` in the Dockerfile must reside within this context.
+
 Run with a reachable PostgreSQL instance:
 
 ```bash
@@ -310,6 +337,14 @@ docker run --rm -p 8000:8000 \
   -e DATABASE_URL='postgresql+psycopg://taskboard:taskboard@host.docker.internal:5432/taskboard' \
   taskboard-backend:local
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `docker run`: Creates and starts an active container process from a container image.
+- `--rm`: Automatically removes the container filesystem when it terminates or is stopped, keeping your Docker environment clean.
+- `-p 8000:8000`: Port forwarding mapping `host_port:container_port`. Exposes FastAPI running on port 8000 inside the container to `http://localhost:8000` on your host.
+- `-e DATABASE_URL='...'`: Injects the database connection string as an environment variable into the running container process.
+- `host.docker.internal`: Special DNS name resolved by Docker Desktop / WSL2 allowing containers to connect to services running directly on the host machine (e.g., PostgreSQL).
+- `taskboard-backend:local`: Target image name and tag to run.
 
 ## 10. Frontend Dockerfile
 
@@ -333,9 +368,14 @@ Build:
 docker build -t taskboard-frontend:local ./frontend
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `docker build`: Assembles the multi-stage image. Stage 1 executes `npm run build` using Node.js to create the compiled HTML/JS/CSS bundle; Stage 2 copies only the production `/dist` directory into an ultra-slim `nginx:alpine` image.
+- `-t taskboard-frontend:local`: Tags the final stage output image.
+- `./frontend`: Path to the frontend source folder containing `Dockerfile` and `package.json`.
+
 ---
 
-# PART F — CI/CD
+# PART F  -  CI/CD
 
 ## 11. GitHub Actions pipeline
 
@@ -385,7 +425,7 @@ This gives traceability from production back to source code.
 
 ---
 
-# PART G — SECURITY SCANNING
+# PART G  -  SECURITY SCANNING
 
 ## 12. Trivy
 
@@ -407,7 +447,7 @@ These are different security layers.
 
 ---
 
-# PART H — TERRAFORM
+# PART H  -  TERRAFORM
 
 ## 13. Why Terraform?
 
@@ -434,6 +474,12 @@ terraform plan
 terraform apply
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `cd terraform`: Switches terminal directory into the Terraform project root where `.tf` configuration files reside.
+- `terraform init`: Scans configuration files, downloads required provider plugins (`hashicorp/aws`, etc.) into `.terraform/`, and initializes the backend state storage.
+- `terraform plan`: Reads active cloud state, compares it with local HCL definitions, and creates a predictive execution plan detailing additions (`+`), modifications (`~`), or deletions (`-`).
+- `terraform apply`: Executes the proposed changes against AWS API, provisioning VPC, subnets, gateways, and EKS managed node groups. Prompts for manual `yes` confirmation before touching live infrastructure.
+
 The default region is `ap-south-1`.
 
 After EKS is created, configure kubectl using the command shown by AWS/Terraform output.
@@ -443,6 +489,9 @@ Destroy when finished:
 ```bash
 terraform destroy
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform destroy`: Reverses all provisioned resources tracked in `terraform.tfstate` in topological dependency order (EKS nodes → EKS control plane → subnets → VPC), preventing unexpected cloud billing.
 
 ### Important teaching point
 
@@ -458,13 +507,17 @@ we describe infrastructure in code and let Terraform reconcile the desired state
 
 ---
 
-# PART I — KUBERNETES
+# PART I  -  KUBERNETES
 
 ## 14. Namespace
 
 ```bash
 kubectl apply -f k8s/namespace.yaml
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl apply`: Declarative Kubernetes engine command. Creates or updates resources to match the YAML manifest specifications.
+- `-f k8s/namespace.yaml`: Specifies the file path containing the `Kind: Namespace` definition, isolating taskboard resources from `default` or `kube-system`.
 
 A namespace provides logical isolation for the application.
 
@@ -478,6 +531,13 @@ helm upgrade --install taskboard ./helm/taskboard \
   --create-namespace
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm upgrade --install`: Idempotent deployment command. If the release `taskboard` doesn't exist, it performs a fresh installation (`helm install`); if it already exists, it applies upgrades (`helm upgrade`).
+- `taskboard`: The unique release name given to this deployment instance.
+- `./helm/taskboard`: Path to the chart directory containing `Chart.yaml`, `values.yaml`, and `templates/`.
+- `--namespace taskboard`: Specifies target Kubernetes namespace for all templated resources.
+- `--create-namespace`: Creates the namespace automatically if it does not already exist in the cluster.
+
 Important Helm concepts:
 
 - Chart
@@ -489,7 +549,7 @@ Important Helm concepts:
 
 ---
 
-# PART J — KUBERNETES COMPONENTS
+# PART J  -  KUBERNETES COMPONENTS
 
 ## 16. Deployment
 
@@ -519,7 +579,7 @@ For production AWS architecture, students should understand the tradeoff between
 
 ---
 
-# PART K — INGRESS
+# PART K  -  INGRESS
 
 ## 19. Ingress
 
@@ -543,11 +603,16 @@ helm upgrade --install taskboard ./helm/taskboard \
   -f helm/taskboard/values-dev.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm upgrade --install`: Ensures release `taskboard` is deployed or updated idempotently.
+- `-n taskboard`: Shorthand for `--namespace taskboard`.
+- `-f helm/taskboard/values-dev.yaml`: Overrides default chart values with environment-specific configurations (e.g., enables `ingress.enabled: true`, sets host to `taskboard.local`, and configures path routing).
+
 Students should understand that an Ingress resource is only configuration. An Ingress Controller must actually implement it.
 
 ---
 
-# PART L — HPA
+# PART L  -  HPA
 
 ## 20. Horizontal Pod Autoscaler
 
@@ -573,13 +638,22 @@ Inspect:
 kubectl get hpa -n taskboard
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl get hpa`: Retrieves Horizontal Pod Autoscaler controllers in the cluster.
+- `-n taskboard`: Restricts output to the `taskboard` namespace.
+- **Output Columns Explained**:
+  - `REFERENCE`: Target deployment (e.g., `Deployment/taskboard-backend`).
+  - `TARGETS`: Current average metric usage vs target threshold (e.g., `12%/50%`).
+  - `MINPODS` / `MAXPODS`: Defined scaling boundaries (e.g., 2 to 10).
+  - `REPLICAS`: Current number of running Pod copies.
+
 HPA requires resource requests and a metrics provider such as Metrics Server.
 
 A normal health request may not create enough CPU pressure to demonstrate scaling. For a classroom demo, use a controlled load generator and watch the metrics.
 
 ---
 
-# PART M — MONITORING
+# PART M  -  MONITORING
 
 ## 21. Prometheus
 
@@ -602,7 +676,7 @@ Useful questions:
 
 ---
 
-# PART N — TROUBLESHOOTING LAB
+# PART N  -  TROUBLESHOOTING LAB
 
 ## 23. Broken image
 
@@ -612,6 +686,9 @@ Apply:
 kubectl apply -f troubleshooting/broken-image.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl apply -f troubleshooting/broken-image.yaml`: Deploys an intentionally misconfigured Deployment pointing to a nonexistent Docker image tag (`taskboard-backend:v999-doesnotexist`), triggering an image pull failure.
+
 Then:
 
 ```bash
@@ -619,6 +696,11 @@ kubectl get pods
 kubectl describe pod <pod-name>
 kubectl get events --sort-by=.lastTimestamp
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl get pods`: Shows high-level status; reveals pods stuck in `ImagePullBackOff` or `ErrImagePull`.
+- `kubectl describe pod <pod-name>`: Displays deep pod details. Check the bottom **Events** section to read exact failure messages (e.g., `Failed to pull image: manifest unknown` or `pull access denied`).
+- `kubectl get events --sort-by=.lastTimestamp`: Lists all cluster events ordered chronologically, showing exactly when the kubelet failed image pull attempts.
 
 Expected investigation:
 
@@ -640,6 +722,9 @@ Apply:
 kubectl apply -f troubleshooting/broken-service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl apply -f troubleshooting/broken-service.yaml`: Creates a Kubernetes Service whose `spec.selector` has a deliberate typo or mismatch with the Pod's labels (e.g., selector `app: wrong-label` vs pod label `app: taskboard-backend`).
+
 Investigate:
 
 ```bash
@@ -648,13 +733,18 @@ kubectl get endpoints
 kubectl get pods --show-labels
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl get svc`: Verifies Service creation and shows assigned `CLUSTER-IP` and ports.
+- `kubectl get endpoints`: Reveals if the Service resolved any backend Pod IPs. If the `ENDPOINTS` column shows `<none>`, selector matching failed.
+- `kubectl get pods --show-labels`: Lists running pods along with their exact active label key-value pairs, allowing you to cross-verify against the Service's selector.
+
 The key lesson is that a Service selects Pods using labels.
 
 No matching labels = no endpoints = no traffic.
 
 ---
 
-# PART O — FINAL DEMO
+# PART O  -  FINAL DEMO
 
 ### 1. Application
 
@@ -806,3 +896,15 @@ Troubleshooting
 ```
 
 That is the actual objective of Session 21.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Full-Stack DevOps Lifecycle**: The end-to-end integration of code writing (FastAPI + React), automated schema migrations (Alembic), containerization (Docker multi-stage builds), CI automation (GitHub Actions), vulnerability scanning (Trivy), Cloud IaC provisioning (Terraform on AWS), container orchestration (Kubernetes & Helm), traffic ingress (Ingress Controllers), elasticity (HPA), and full observability (Prometheus & Grafana).
+- **Multi-Stage Build**: A Dockerfile pattern using multiple `FROM` instructions where intermediate build dependencies (Node.js SDK, compilation tools, caches) are discarded, and only the minimal production artifacts (compiled HTML/JS) are copied into a lightweight runtime image (Alpine Linux/Nginx), reducing image size by up to 90%.
+- **Database Migrations (Alembic)**: Version-controlled schema alterations applied programmatically to the database before the application process starts up, ensuring the PostgreSQL schema perfectly matches the ORM model definitions across all deployment environments.
+- **Traceability via Git Commit SHA**: Tagging container images directly with the Git commit hash (`taskboard:c0ffee1`) instead of mutable tags like `latest`. This ensures that any container running in production or cluster can be linked precisely to the exact line of code and author that built it.
+- **Service Label Selectors vs Endpoints**: A Kubernetes Service does not directly forward traffic to Pod names; it continuously queries the API Server for Pods matching `spec.selector`. Matching Pods have their internal IPs registered as an `Endpoints` object. If selectors mismatch, the Service has 0 endpoints and traffic drops with connection timeouts.
+- **Ingress vs Ingress Controller**: An Ingress resource is merely a declarative configuration document specifying routing rules (e.g., `/api` -> backend, `/` -> frontend). The Ingress Controller (such as ingress-nginx or AWS ALB Controller) is the running reverse-proxy daemon that watches these rules and reconfigures its routing tables dynamically.
+- **Metrics Server & HPA**: The Horizontal Pod Autoscaler controller queries the Kubernetes Metrics API (served by Metrics Server) every 15 seconds. If current CPU/memory consumption exceeds the defined target utilization percentage, it scales up the Deployment replica count according to the formula: `desiredReplicas = ceil[currentReplicas * (currentMetric / targetMetric)]`.
+- **Shift-Left Security (DevSecOps)**: Introducing automated vulnerability scanning (Trivy for containers, bandit/pip-audit for dependencies) early in the developer pipeline before deployment, preventing insecure images from ever reaching the production cluster.

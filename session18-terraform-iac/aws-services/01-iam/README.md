@@ -153,3 +153,21 @@ aws iam create-role \
   --role-name S3ReadOnlyEC2Role \
   --assume-role-policy-document file://trust-policy.json
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `aws sts get-caller-identity`: Returns the account ID, current IAM ARN, and Unique User ID to confirm authentication status.
+- `aws iam list-users`: Returns a JSON array of all IAM users present in the AWS account.
+- `aws iam create-user --user-name devops-engineer`: Provisions an IAM User entity without console password or API keys.
+- `aws iam create-access-key --user-name devops-engineer`: Generates an `AccessKeyId` and `SecretAccessKey` pair for CLI/SDK automation. **Secret key is returned once only!**
+- `aws iam attach-user-policy`: Binds an IAM policy ARN (e.g. `arn:aws:iam::aws:policy/ReadOnlyAccess`) to the user.
+- `aws iam list-attached-user-policies`: Inspects active managed permissions attached to an IAM identity.
+- `aws iam create-role`: Provisions an IAM Role with an assume-role trust document specifying which principal (e.g. `ec2.amazonaws.com`) is permitted to assume it.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Principal:** The entity (IAM user, AWS service, external federated identity) allowed or denied access in a policy statement.
+- **Trust Policy vs Permissions Policy:** A trust policy defines *who* can assume the role (e.g. EC2 service); a permissions policy defines *what* that role is allowed to do once assumed (e.g. read S3 objects).
+- **Instance Profile:** An AWS container passing an IAM role to an Amazon EC2 instance at boot time, eliminating the need to store static AWS credentials on the virtual machine.
+- **Explicit Deny Precedence:** In AWS authorization evaluation, a single matching `"Effect": "Deny"` statement overrides any number of `"Allow"` statements.
+

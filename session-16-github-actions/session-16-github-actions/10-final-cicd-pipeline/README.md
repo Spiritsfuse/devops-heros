@@ -96,6 +96,12 @@ chmod +x build.sh
 ./build.sh
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `python3 -m pip install -r requirements.txt`: Installs required packages (`pytest`) defined in requirements.
+- `python3 app/calculator.py`: Runs calculator app logic locally.
+- `pytest -v`: Executes unit test assertions with verbose reporting.
+- `chmod +x build.sh && ./build.sh`: Marks script executable and packages files into `build/`.
+
 ---
 
 ## 9. Git Commands
@@ -107,6 +113,14 @@ git branch -M main
 git remote add origin https://github.com/YOUR_USERNAME/session16-cicd-github-actions.git
 git push -u origin main
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `git init`: Initializes a new empty Git tracking repository in the current folder.
+- `git add .`: Stages all repository files into the Git index.
+- `git commit -m "Add final CI/CD pipeline"`: Creates an immutable commit snapshot with the commit message.
+- `git branch -M main`: Renames the default branch to `main` (`-M` forces rename).
+- `git remote add origin <url>`: Configures the remote GitHub repository endpoint named `origin`.
+- `git push -u origin main`: Pushes local commits to the remote `main` branch and sets upstream tracking (`-u`).
 
 ---
 
@@ -210,3 +224,12 @@ CI/CD
 > **git push** → **GitHub Actions** → **Test** → **Security Check** → **Build** → **Artifact** → **Ready for CD / Deployment**
 
 The next step after this session is to connect the pipeline to a deployment target such as Docker, Kubernetes, AWS, or Azure.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Upstream Tracking (`-u` / `--set-upstream`):** Links the local branch with the remote repository branch so future sync operations only need `git push` or `git pull`.
+- **Branch Protection Rules:** GitHub repository settings that require status checks (like `Test Application` and `Security Check`) to pass before code can be merged into `main`.
+- **Security Check Gate:** An automated gate in the pipeline that halts execution if sensitive patterns (like private keys or plaintext secrets) are detected in committed files.
+- **Continuous Integration Maturity:** Transitioning from manual, error-prone local builds to automated, repeatable, cloud-verified builds on every single commit.
+

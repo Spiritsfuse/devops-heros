@@ -63,6 +63,11 @@ aws_s3_bucket.demo
 terraform show
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform show`: Displays all state metadata and provider attributes (such as `arn`, `bucket_domain_name`, `hosted_zone_id`) computed by AWS during bucket provisioning.
+- `terraform fmt`: Formats HCL syntax, aligning assignment operators (`=`) and indentations automatically.
+- `terraform state list`: Confirms the local identifier `aws_s3_bucket.demo` is registered in state.
+
 ## Cleanup
 
 ```bash
@@ -95,3 +100,12 @@ Run:
 terraform fmt
 terraform plan
 ```
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Resource Block:** The fundamental building block in Terraform (`resource "type" "name"`) declaring a physical or virtual infrastructure component.
+- **Computed Attributes:** Attributes whose values are not known until the resource is created in the cloud (e.g. bucket ARN, creation date, regional domain name).
+- **Resource Addressing:** The reference syntax `aws_s3_bucket.demo` used by other resources or outputs to link configuration objects.
+- **In-Place Modification (`~`):** A plan status indicating that adding or editing attributes (like tags) will update the resource live without destroying and recreating it.
+

@@ -1,9 +1,9 @@
-# Kubernetes Pods, ReplicaSets & Deployments – Homework
+﻿# Kubernetes Pods, ReplicaSets & Deployments - Homework
 
 **Name:** Dhruv Sharma
 **Roll No:** 24BCS10294
 
-Manifests are from the class repository ([session10-k8s-core-objects](https://github.com/Nency-Ravaliya/devops-heros/tree/main/session10-k8s-core-objects)) and are copied into [manifests/](manifests). I ran them on my local 2-node kind cluster. All outputs are copied from my terminal.
+Manifests are from the class repository ([session10-k8s-core-objects](https://github.com/Spiritsfuse/devops-heros/tree/main/session10-k8s-core-objects)) and are copied into [manifests/](manifests). I ran them on my local 2-node kind cluster. All outputs are copied from my terminal.
 
 | Object | What it adds |
 |---|---|
@@ -38,7 +38,7 @@ No resources found in default namespace.
 
 **What I understood:** a bare Pod is not protected. After `kubectl delete pod` there were **no resources** left, nobody re-created it. That is why Pods are almost never created directly in production.
 
-## 2. ReplicaSet – self-healing and scaling
+## 2. ReplicaSet - self-healing and scaling
 
 [manifests/backend-rs.yaml](manifests/backend-rs.yaml) asks for `replicas: 3` with the selector `app=yatri-backend`.
 
@@ -99,7 +99,7 @@ replicaset.apps "yatri-backend-rs" deleted from default namespace
 - `kubectl scale --replicas=5` created 2 more Pods. The `Events` list shows every `SuccessfulCreate`.
 - A ReplicaSet cannot do a controlled image update. That is the job of a Deployment.
 
-## 3. Deployment – rolling update, history, rollback
+## 3. Deployment - rolling update, history, rollback
 
 [manifests/deployment-v1.yaml](manifests/deployment-v1.yaml) → [manifests/deployment-v2.yaml](manifests/deployment-v2.yaml)
 
@@ -198,7 +198,7 @@ yatri-backend   5/5     5            5           4s
 - After the undo, revision 1 became revision 3 in `rollout history`. A rollback is recorded as a new revision.
 - The `kubernetes.io/change-cause` annotation fills the `CHANGE-CAUSE` column, which is useful to know why a release was made.
 
-## 4. Troubleshooting – a broken image
+## 4. Troubleshooting - a broken image
 
 I pushed a wrong image tag on purpose, the same error as in `troubleshooting/broken-image.yaml`.
 
@@ -296,9 +296,9 @@ $ kubectl delete -f hello.yml
 pod "hello-pod" deleted from default namespace
 ```
 
-**What I understood:** with a real image pull this pod moves `ContainerCreating → Running → Completed` (phase `Succeeded`), but `busybox echo` finishes in well under a second, so `Running` was only ever an instant between two polls. `Completed`/`Succeeded` means exit code 0 — a Pod that behaves like a one-shot Job, not a service.
+**What I understood:** with a real image pull this pod moves `ContainerCreating → Running → Completed` (phase `Succeeded`), but `busybox echo` finishes in well under a second, so `Running` was only ever an instant between two polls. `Completed`/`Succeeded` means exit code 0  -  a Pod that behaves like a one-shot Job, not a service.
 
-## 7. StatefulSet — ordinal identity that survives a delete
+## 7. StatefulSet  -  ordinal identity that survives a delete
 
 [k8s-core-objects/statefulset.yml](k8s-core-objects/statefulset.yml): a 3-replica MySQL StatefulSet with a `volumeClaimTemplate` per Pod.
 
@@ -348,12 +348,12 @@ persistentvolumeclaim "mysql-persistent-storage-mysql-2" deleted from default na
 
 **What I understood:**
 
-- StatefulSet Pods are created **one at a time, in order** (`mysql-0` fully `Running` before `mysql-1` even starts `Pending`) — unlike a ReplicaSet, which creates all replicas in parallel.
+- StatefulSet Pods are created **one at a time, in order** (`mysql-0` fully `Running` before `mysql-1` even starts `Pending`)  -  unlike a ReplicaSet, which creates all replicas in parallel.
 - Each Pod gets a **stable ordinal name** (`mysql-0`, `-1`, `-2`) and its **own PVC**, named after it. Deleting `mysql-1` did not reshuffle anyone: Kubernetes recreated a new Pod but reused the identity **`mysql-1`** (new IP, new container, same name and same PVC).
-- This is exactly why StatefulSets are used for anything where a replica needs a durable, addressable identity (databases, Kafka brokers, anything using per-replica storage) — a Deployment's ReplicaSet would have given the replacement Pod a brand-new random name instead.
-- `kubectl delete -f statefulset.yml` does **not** delete the PVCs — that's deliberate, so data survives a StatefulSet being scaled down or deleted by mistake; they have to be deleted separately.
+- This is exactly why StatefulSets are used for anything where a replica needs a durable, addressable identity (databases, Kafka brokers, anything using per-replica storage)  -  a Deployment's ReplicaSet would have given the replacement Pod a brand-new random name instead.
+- `kubectl delete -f statefulset.yml` does **not** delete the PVCs  -  that's deliberate, so data survives a StatefulSet being scaled down or deleted by mistake; they have to be deleted separately.
 
-## 8. Blue-Green Deployment — instant selector cutover
+## 8. Blue-Green Deployment  -  instant selector cutover
 
 [02-blue-green/](02-blue-green): two complete 3-replica environments (`app-blue` v1, `app-green` v2) running side by side, with one `Service` whose selector decides who is "live".
 
@@ -361,7 +361,7 @@ persistentvolumeclaim "mysql-persistent-storage-mysql-2" deleted from default na
 $ kubectl apply -f 02-blue-green/deployment-blue.yaml -f 02-blue-green/deployment-green.yaml
 deployment.apps/app-blue created
 deployment.apps/app-green created
-# both roll out to 3/3 Running — 6 pods total, both versions live simultaneously
+# both roll out to 3/3 Running  -  6 pods total, both versions live simultaneously
 
 $ kubectl apply -f 02-blue-green/service-blue.yaml
 service/myapp-service created
@@ -372,7 +372,7 @@ Endpoints:                10.244.0.15:80,10.244.0.16:80,10.244.0.17:80
 $ docker exec minikube curl -s http://localhost:30020
 <p>BLUE ENVIRONMENT</p>
 
-# THE SWITCH — flip all traffic to green with one apply, no pod restarts:
+# THE SWITCH  -  flip all traffic to green with one apply, no pod restarts:
 $ kubectl apply -f 02-blue-green/service-green.yaml
 service/myapp-service configured
 $ kubectl describe svc myapp-service | grep -E "Selector|Endpoints"
@@ -382,7 +382,7 @@ Endpoints:                10.244.0.18:80,10.244.0.19:80,10.244.0.20:80
 $ docker exec minikube curl -s http://localhost:30020
 <p>GREEN ENVIRONMENT</p>
 
-# Instant rollback — reapply the blue Service:
+# Instant rollback  -  reapply the blue Service:
 $ kubectl apply -f 02-blue-green/service-blue.yaml
 service/myapp-service configured
 $ docker exec minikube curl -s http://localhost:30020
@@ -391,9 +391,9 @@ $ docker exec minikube curl -s http://localhost:30020
 $ kubectl delete -f 02-blue-green/service-blue.yaml -f 02-blue-green/deployment-blue.yaml -f 02-blue-green/deployment-green.yaml
 ```
 
-**What I understood:** both versions run at full scale the entire time, so the "cutover" is really just editing which Pods a Service's `selector` matches — the Service's `Endpoints` update immediately, with no rolling restart and no in-between mixed-version state. Rollback is exactly as instant as the forward switch (reapply the old Service). The cost is running 2x the Pods for the duration of the release.
+**What I understood:** both versions run at full scale the entire time, so the "cutover" is really just editing which Pods a Service's `selector` matches  -  the Service's `Endpoints` update immediately, with no rolling restart and no in-between mixed-version state. Rollback is exactly as instant as the forward switch (reapply the old Service). The cost is running 2x the Pods for the duration of the release.
 
-## 9. Canary Deployment — pod-ratio traffic splitting
+## 9. Canary Deployment  -  pod-ratio traffic splitting
 
 [03-canary/](03-canary): one Service selects Pods from **both** a 9-replica stable Deployment and a 1-replica canary Deployment via a shared label, so traffic splits by pod-count ratio.
 
@@ -410,7 +410,7 @@ CANARY v2   <- roughly 1 in 10, matching the 9:1 pod ratio
 STABLE v1
 ...
 CANARY v2
-STABLE v1  (16x STABLE, 2x CANARY across 18 shown lines here — ~10%)
+STABLE v1  (16x STABLE, 2x CANARY across 18 shown lines here  -  ~10%)
 
 # Shift more traffic to canary: scale to 3 canary / 7 stable (~30%)
 $ kubectl scale deployment app-canary --replicas=3
@@ -431,11 +431,11 @@ STABLE v1
 $ kubectl delete -f 03-canary/service.yaml -f 03-canary/deployment-canary.yaml -f 03-canary/deployment-stable.yaml
 ```
 
-**What I understood:** there's no built-in "10% of traffic" primitive here — `kube-proxy` load-balances evenly across every Pod behind a Service, so the *only* way to control the split is the **ratio of replica counts** feeding the same selector. Scaling canary up/down changes the odds instantly, and scaling it to 0 is a clean, instant rollback (the Pods are gone, only stable ones answer).
+**What I understood:** there's no built-in "10% of traffic" primitive here  -  `kube-proxy` load-balances evenly across every Pod behind a Service, so the *only* way to control the split is the **ratio of replica counts** feeding the same selector. Scaling canary up/down changes the odds instantly, and scaling it to 0 is a clean, instant rollback (the Pods are gone, only stable ones answer).
 
-## 10. Recreate Deployment — deliberate downtime window
+## 10. Recreate Deployment  -  deliberate downtime window
 
-[04-recreate/](04-recreate): `strategy.type: Recreate` kills every old Pod before creating any new one — the opposite of a rolling update.
+[04-recreate/](04-recreate): `strategy.type: Recreate` kills every old Pod before creating any new one  -  the opposite of a rolling update.
 
 ```text
 $ kubectl apply -f 04-recreate/deployment-v1.yaml -f 04-recreate/service.yaml
@@ -470,9 +470,9 @@ deployment "app-recreate" successfully rolled out
 $ kubectl delete -f 04-recreate/service.yaml -f 04-recreate/deployment-v2.yaml
 ```
 
-**What I understood:** with `Recreate`, there really is a window with **zero** Pods serving traffic — the curl loop hit real `Connection refused` errors between the last v1 Pod terminating and the first v2 Pod becoming ready. This is the opposite trade-off from `RollingUpdate`/Blue-Green: simpler (never runs two versions at once, so no compatibility concerns between v1 and v2 talking to the same database schema, for example) but it costs guaranteed downtime. `rollout undo` works the same way as with `RollingUpdate` — it triggers another Recreate cycle back to the previous revision.
+**What I understood:** with `Recreate`, there really is a window with **zero** Pods serving traffic  -  the curl loop hit real `Connection refused` errors between the last v1 Pod terminating and the first v2 Pod becoming ready. This is the opposite trade-off from `RollingUpdate`/Blue-Green: simpler (never runs two versions at once, so no compatibility concerns between v1 and v2 talking to the same database schema, for example) but it costs guaranteed downtime. `rollout undo` works the same way as with `RollingUpdate`  -  it triggers another Recreate cycle back to the previous revision.
 
-## 11. Troubleshooting Drill 2 — immutable selector mismatch
+## 11. Troubleshooting Drill 2  -  immutable selector mismatch
 
 [troubleshooting/selector-mismatch.yaml](troubleshooting/selector-mismatch.yaml) has `spec.selector.matchLabels.app: correct-app-name` but `spec.template.metadata.labels.app: wrong-app-name`.
 
@@ -488,7 +488,7 @@ NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
 selector-error-demo   0/1     1            0           1s
 ```
 
-**What I understood:** unlike the empty-endpoints selector mismatch (Session 11, a Service silently matching nothing), this one is rejected **at `kubectl apply` time** by the API server, because `spec.selector` on a Deployment/ReplicaSet is immutable and must always be satisfied by its own Pod template — Kubernetes refuses to create a controller that could never find its own Pods.
+**What I understood:** unlike the empty-endpoints selector mismatch (Session 11, a Service silently matching nothing), this one is rejected **at `kubectl apply` time** by the API server, because `spec.selector` on a Deployment/ReplicaSet is immutable and must always be satisfied by its own Pod template  -  Kubernetes refuses to create a controller that could never find its own Pods.
 
 ## 12. Theory writeup
 
@@ -496,10 +496,10 @@ selector-error-demo   0/1     1            0           1s
 
 | Port | Lives on | Meaning |
 |---|---|---|
-| `containerPort` | Pod spec | Documents which port the process inside the container listens on (informational only — not enforced) |
+| `containerPort` | Pod spec | Documents which port the process inside the container listens on (informational only  -  not enforced) |
 | `targetPort` | Service spec | The port on the **Pod** that the Service forwards traffic to |
 | `port` | Service spec | The port the Service itself exposes inside the cluster (what other Pods connect to) |
-| `nodePort` | Service spec (`type: NodePort`/`LoadBalancer`) | The port opened on **every node's** IP, `30000–32767` |
+| `nodePort` | Service spec (`type: NodePort`/`LoadBalancer`) | The port opened on **every node's** IP, `30000-32767` |
 
 Flow: `Client → nodePort (node IP) → port (Service VIP) → targetPort (Pod IP) → containerPort (process)`.
 
@@ -510,13 +510,13 @@ Flow: `Client → nodePort (node IP) → port (Service VIP) → targetPort (Pod 
 | Strategy | Downtime | Extra capacity needed | Rollback speed |
 |---|---|---|---|
 | `RollingUpdate` (default) | None, if `maxUnavailable: 0` | `maxSurge` extra Pods, briefly | One more rolling update, gradual |
-| `Recreate` | Yes — all old Pods die before new ones start | None | Another Recreate cycle |
+| `Recreate` | Yes  -  all old Pods die before new ones start | None | Another Recreate cycle |
 | Blue-Green | None | 2x (both full environments run at once) | Instant (flip the Service selector back) |
 | Canary | None | Small (a few extra Pods for the canary slice) | Instant (scale canary to 0) |
 
-**`maxSurge` vs. `maxUnavailable`** (for `replicas: 4`, `maxSurge: 1`, `maxUnavailable: 0`): the rollout may briefly run up to `4 + 1 = 5` Pods, but must never drop below `4 - 0 = 4` Pods Ready — i.e. full capacity is guaranteed throughout, at the cost of one extra Pod's worth of resources during the update.
+**`maxSurge` vs. `maxUnavailable`** (for `replicas: 4`, `maxSurge: 1`, `maxUnavailable: 0`): the rollout may briefly run up to `4 + 1 = 5` Pods, but must never drop below `4 - 0 = 4` Pods Ready  -  i.e. full capacity is guaranteed throughout, at the cost of one extra Pod's worth of resources during the update.
 
-**Requests vs. Limits, and GB vs. GiB:** a `request` is what the scheduler guarantees/reserves when placing the Pod on a node; a `limit` is the hard ceiling enforced by the kernel (cgroups) — exceed the CPU limit and the container is throttled, exceed the memory limit and it's OOM-killed. `1 GB = 10^9` bytes (decimal/SI), `1 GiB = 2^30 = 1,073,741,824` bytes (binary/IEC) — Kubernetes resource units (`Mi`, `Gi`) are always the binary ones, so `256Mi` is a bit more than `256MB`.
+**Requests vs. Limits, and GB vs. GiB:** a `request` is what the scheduler guarantees/reserves when placing the Pod on a node; a `limit` is the hard ceiling enforced by the kernel (cgroups)  -  exceed the CPU limit and the container is throttled, exceed the memory limit and it's OOM-killed. `1 GB = 10^9` bytes (decimal/SI), `1 GiB = 2^30 = 1,073,741,824` bytes (binary/IEC)  -  Kubernetes resource units (`Mi`, `Gi`) are always the binary ones, so `256Mi` is a bit more than `256MB`.
 
 ---
 
@@ -530,7 +530,7 @@ Flow: `Client → nodePort (node IP) → port (Service VIP) → targetPort (Pod 
 | `CrashLoopBackOff` | Container starts and keeps crashing | `kubectl logs --previous` |
 | `Running` but `0/1 READY` | Readiness probe failing | Probe path/port, application logs |
 | `Completed` | Container finished with exit code 0 | Normal for Jobs |
-| `Terminating` | Being shut down (grace period 30s by default) | – |
+| `Terminating` | Being shut down (grace period 30s by default) | - |
 
 ---
 
@@ -538,10 +538,10 @@ Flow: `Client → nodePort (node IP) → port (Service VIP) → targetPort (Pod 
 
 *Exact grading guidelines are yet to be shared by the instructor; the checklist below is reconstructed from class notes and is what this submission targets.*
 
-1. Work through all 12 files in the `pod-lifecycle/` folder in order, running `kubectl apply -f`, `kubectl get pods -w` (the `w` flag watches for live changes), `kubectl describe pod`, and `kubectl logs` for each — including readiness, liveness, startup, init container, multi-container and graceful termination.
+1. Work through all 12 files in the `pod-lifecycle/` folder in order, running `kubectl apply -f`, `kubectl get pods -w` (the `w` flag watches for live changes), `kubectl describe pod`, and `kubectl logs` for each  -  including readiness, liveness, startup, init container, multi-container and graceful termination.
 2. Deploy the `yatri-backend-rs` ReplicaSet, confirm 3 Pods running, then practice scaling it up and down using `kubectl scale`.
 3. Deploy `deployment-v1.yaml`, confirm via `kubectl get all`, then scale it with `kubectl scale deployment yatri-backend --replicas=5` and confirm 5 Pods appear.
-4. Deploy `deployment-v2.yaml` over the running v1 deployment and observe the rolling update happen live via `kubectl get pods -w` — watch old Pods terminate as new ones become ready.
+4. Deploy `deployment-v2.yaml` over the running v1 deployment and observe the rolling update happen live via `kubectl get pods -w`  -  watch old Pods terminate as new ones become ready.
 5. Deliberately try `troubleshooting/selector-mismatch.yaml` and `troubleshooting/broken-image.yaml` to see, on purpose, what a selector mismatch error and a broken-image rollout failure actually look like.
 
 ---

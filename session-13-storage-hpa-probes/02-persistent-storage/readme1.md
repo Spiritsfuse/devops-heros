@@ -81,11 +81,17 @@ Run:
 kubectl apply -f pv.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pv.yaml`: Submits the PersistentVolume definition to the cluster API server. Since PV is a cluster-scoped resource (not bound to any namespace), it becomes globally available for matching claims.
+
 Check:
 
 ```bash
 kubectl get pv
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pv`: Lists all physical/virtual storage volumes configured in the cluster. Note the `STATUS` initially displays `Available` (ready to be bound).
 
 Expected output:
 
@@ -104,11 +110,17 @@ Run:
 kubectl apply -f pvc.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pvc.yaml`: Submits the PersistentVolumeClaim manifest in the active namespace. Kubernetes' PV controller immediately searches for an unassigned PV matching the requested capacity and access mode.
+
 Check:
 
 ```bash
 kubectl get pvc
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pvc`: Checks the claim. When successfully paired, the `STATUS` transitions to `Bound` and the `VOLUME` column lists `student-pv`.
 
 Expected output:
 
@@ -129,11 +141,17 @@ Run:
 kubectl apply -f pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pod.yaml`: Deploys the consumer Pod. The pod's spec mounts the volume backed by `student-pvc` onto `/data`.
+
 Check:
 
 ```bash
 kubectl get pods
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pods`: Monitors pod startup. Kubelet attaches and formats the storage before launching container processes.
 
 Expected output:
 
@@ -152,11 +170,17 @@ Enter the Pod:
 kubectl exec -it storage-demo -- bash
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl exec -it storage-demo -- bash`: Opens an interactive Bash shell session directly inside the running container.
+
 Create a file inside the mount path:
 
 ```bash
 echo "Kubernetes Storage" > /data/message.txt
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `echo "..." > /data/message.txt`: Writes text to a file located inside `/data`. Because `/data` is backed by the persistent volume, the bits are physically written to the underlying storage volume rather than the container's temporary read-write layer.
 
 Read it:
 
@@ -186,17 +210,26 @@ Delete the running Pod:
 kubectl delete pod storage-demo
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete pod storage-demo`: Completely deletes and unmounts the Pod. Any data written inside the non-mounted root filesystem of the container is permanently erased.
+
 Create it again:
 
 ```bash
 kubectl apply -f pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pod.yaml`: Launches a brand new container instance. Kubelet attaches the existing PVC (`student-pvc`) back onto the new container's `/data` directory.
+
 Now check the file:
 
 ```bash
 kubectl exec storage-demo -- cat /data/message.txt
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl exec storage-demo -- cat /data/message.txt`: Non-interactive execution of `cat` inside the new container. The original data is returned intact!
 
 Expected output:
 
@@ -251,6 +284,11 @@ kubectl get pods
 kubectl describe pod storage-demo
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe pv student-pv`: Displays low-level storage driver parameters (e.g. host directory path, CSI volume handle, reclaim policy, binding timestamp).
+* `kubectl describe pvc student-pvc`: Checks PVC status conditions, volume capacity allocations, and storage class associations.
+* `kubectl describe pod storage-demo`: Shows pod storage volume mounts, identifying whether storage attach/mount operations succeeded or encountered `FailedMount` events.
+
 ---
 
 ## Key Learning
@@ -267,3 +305,14 @@ Remember:
 
 * **Persistent Volumes:**  
   https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **PV Lifecycle Statuses:**
+  * `Available`: Free volume ready to be claimed.
+  * `Bound`: Claimed and paired with a PVC.
+  * `Released`: PVC was deleted, but storage resource is not yet recycled by the cluster.
+  * `Failed`: Automated reclamation failed.
+* **Persistent Storage Decoupling:** Architectural design separating administrative storage allocation (PV) from developer consumption requests (PVC), enabling cloud-agnostic application deployments.
+* **Storage Mounting vs Container Layer:** Files written to container root filesystems are lost on container restart; files written to volume mount points bypass container storage drivers (`overlay2`) and persist on the persistent storage volume.

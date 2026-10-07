@@ -121,7 +121,22 @@ Then:
 terraform apply tfplan
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform plan -out=tfplan`: Computes the execution plan and saves the compiled binary representation into an immutable file (`tfplan`). This prevents concurrency race conditions where infrastructure drifts between planning and applying.
+- `terraform apply tfplan`: Directly applies the exact actions recorded in the saved plan file without prompting for manual confirmation (`yes`) and without recalculating a new plan.
+- `terraform validate`: Statically verifies internal syntax, variable types, and attribute names without contacting remote cloud APIs or reading state.
+
 A saved plan allows the apply step to execute the reviewed plan rather than generating a new plan.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Plan File (`-out=tfplan`):** A compiled binary archive containing the planned changes, current state snapshot, and provider configurations, ensuring deterministic execution in CI/CD pipelines.
+- **Resource Replacement (`-/+`):** An action where Terraform must destroy an existing resource and create a new one because a modified attribute is immutable in the cloud provider's API (e.g. changing an S3 bucket name or AWS VPC CIDR).
+- **Execution Drift:** A discrepancy that arises when cloud resources are modified out-of-band (e.g. directly via the AWS web console) without updating Terraform code.
+- **Idempotent Apply:** If no changes are made to configuration or real-world infrastructure, running `terraform apply` reports `No changes. Infrastructure is up-to-date` and takes zero actions.
+
+---
 
 ## Student Exercise
 
@@ -136,3 +151,4 @@ terraform apply
 terraform output
 terraform state list
 ```
+

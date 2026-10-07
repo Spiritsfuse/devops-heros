@@ -63,8 +63,8 @@ keywords:
   - web
 home: https://example.com
 maintainers:
-  - name: Nency
-    email: nency@example.com
+  - name: Dhruv Sharma (Spiritsfuse)
+    email: dhruv@example.com
 ```
 
 ---
@@ -87,6 +87,9 @@ Run:
 ```bash
 helm lint my-app/
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `helm lint my-app/`: Static validation tool. Verifies that mandatory metadata fields (`apiVersion`, `name`, `version`) are formatted properly, checks SemVer compliance, and detects formatting issues or broken Go template syntax across the entire chart directory.
 
 Expected output:
 
@@ -136,3 +139,14 @@ Chart.yaml fields:
 ## Reference
 
 * **Chart.yaml fields:** https://helm.sh/docs/topics/charts/#the-chartyaml-file
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **`version` vs `appVersion`:**
+  * `version`: The version of the Helm package itself following strict SemVer (`1.2.3`). Incremented whenever chart templates, values defaults, or resource specs change.
+  * `appVersion`: The version of the actual underlying application binary or container image (e.g. `"1.25.3"` or git SHA). Does not have to follow SemVer.
+* **Application vs Library Charts (`type`):**
+  * `application`: A standard, deployable chart that creates Kubernetes objects.
+  * `library`: A reusable utility chart containing shared definitions and helpers intended to be consumed by other charts via `dependencies`, but never deployed directly.
+* **Chart Dependencies (`dependencies`):** A list of subcharts defined in `Chart.yaml` (e.g. declaring Redis or PostgreSQL as a prerequisite subchart) automatically downloaded into `charts/` via `helm dependency update`.

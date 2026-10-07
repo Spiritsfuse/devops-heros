@@ -143,10 +143,16 @@ spec:
 kubectl apply -f 05-headless/service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f`: Deploys the Service object with `clusterIP: None`. Instructs CoreDNS to dynamically return multiple A-records (one per matching pod) rather than assigning a virtual cluster IP.
+
 Verify service creation:
 ```bash
 kubectl get svc web-service-headless
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get svc web-service-headless`: Displays service metadata. The `CLUSTER-IP` column explicitly indicates `None`, confirming no proxy IP is allocated.
 
 Expected Output:
 ```text
@@ -160,10 +166,16 @@ Notice `CLUSTER-IP` is explicitly `None`!
 kubectl apply -f 05-headless/app-statefulset.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `apply -f .../app-statefulset.yaml`: Creates the StatefulSet controller managing ordinal pods (`web-stateful-0`, `web-stateful-1`, `web-stateful-2`). The `serviceName` matches the headless service to register individual pod DNS records.
+
 Wait until all 3 stateful pods are running:
 ```bash
 kubectl get pods -l app=web-headless -o wide
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get pods -l app=web-headless -o wide`: Filters pods by label `app=web-headless` and displays individual pod IP addresses and host worker nodes.
 
 Expected Output:
 ```text
@@ -182,15 +194,25 @@ web-stateful-2   1/1     Running   0          20s   10.244.0.32   minikube
 kubectl apply -f 05-headless/client-pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `apply -f .../client-pod.yaml`: Deploys an alpine diagnostic container equipped with DNS (`nslookup`) and HTTP (`curl`) testing binaries.
+
 Wait until running:
 ```bash
 kubectl get pod headless-dns-client
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `get pod headless-dns-client`: Checks that the diagnostic container is in `Running` status before attempting to execute shell commands inside it.
+
 ### Step 2: DNS Lookup on Service Name (Returns ALL Pod IPs)
 ```bash
 kubectl exec -it headless-dns-client -- nslookup web-service-headless
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl exec -it`: Executes an interactive command in the container.
+* `nslookup web-service-headless`: Queries CoreDNS for the headless service name. Instead of a single VIP, CoreDNS returns a multi-line response containing the direct IP addresses of all 3 pods.
 
 Expected Output:
 ```text
@@ -210,6 +232,9 @@ Query Pod 0 specifically:
 kubectl exec -it headless-dns-client -- nslookup web-stateful-0.web-service-headless.default.svc.cluster.local
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `nslookup web-stateful-0.web-service-headless.default.svc.cluster.local`: Queries CoreDNS for the fully qualified domain name (FQDN) of ordinal pod 0. CoreDNS resolves strictly pod 0's private IP (`10.244.0.30`).
+
 Expected Output:
 ```text
 Server:    10.96.0.10
@@ -223,6 +248,9 @@ Address:   10.244.0.30
 ```bash
 kubectl exec -it headless-dns-client -- curl -s http://web-stateful-0.web-service-headless:80
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `curl -s http://web-stateful-0.web-service-headless:80`: Sends an HTTP request directly to Pod 0 bypassing any load balancing proxy. Essential for primary-replica topologies where writes must go exclusively to node 0.
 
 Expected Output (Nginx HTML from Pod 0):
 ```html
@@ -252,3 +280,14 @@ kubectl delete -f 05-headless/client-pod.yaml
 kubectl delete -f 05-headless/app-statefulset.yaml
 kubectl delete -f 05-headless/service.yaml
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete -f`: Destroys the test pod, the StatefulSet and its pods, and the headless service resource cleanly.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Headless Service:** A Service with `spec.clusterIP: None` that does not allocate a VIP or route via kube-proxy; it allows direct Pod IP discovery via DNS A-records.
+* **StatefulSet:** A Kubernetes workload API object used to manage stateful applications. Unlike Deployments where pods are random and interchangeable, StatefulSet pods receive a sticky, unique identity (index `0`, `1`, `2`) and persistent storage.
+* **Stable Network Identity:** Guaranteed DNS name format (`<pod-name>.<service-name>.<namespace>.svc.cluster.local`) assigned to StatefulSet pods when tied to a headless service via `spec.serviceName`.
+* **Client-Side Load Balancing:** An architecture where the client application itself decides which backend node to contact (e.g. gRPC connection pools, Cassandra driver) instead of relying on an intermediate proxy or VIP.

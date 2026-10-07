@@ -119,3 +119,21 @@ aws ec2 create-route \
   --destination-cidr-block 0.0.0.0/0 \
   --gateway-id igw-0123456789abcdef0
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `aws ec2 describe-vpcs`: Lists all VPCs in the current AWS region with their CIDR blocks, DHCP options, and default VPC status.
+- `aws ec2 create-vpc --cidr-block 10.0.0.0/16`: Provisions a private software-defined network boundary with 65,536 private IPv4 addresses.
+- `aws ec2 create-internet-gateway`: Creates an Internet Gateway resource.
+- `aws ec2 attach-internet-gateway`: Connects the created gateway to the VPC boundary, providing the physical internet link.
+- `aws ec2 create-subnet`: Partitions a portion of the VPC CIDR (e.g. `10.0.1.0/24`) and anchors it within a specific Availability Zone (`ap-south-1a`).
+- `aws ec2 create-route`: Adds a next-hop route to a route table targeting all external internet traffic (`0.0.0.0/0`) through the attached Internet Gateway (`--gateway-id`).
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **VPC (Virtual Private Cloud):** An isolated virtual network logically dedicated to your AWS account, mirroring a traditional data center network with scalable AWS infrastructure.
+- **CIDR Block:** Classless Inter-Domain Routing prefix notation (e.g. `/16` or `/24`) designating the network bit-length and available IP address capacity.
+- **Public vs Private Subnet:** A subnet is public if its route table routes traffic to an Internet Gateway (`0.0.0.0/0 -> IGW`); it is private if traffic routes to a NAT Gateway or stays local.
+- **NAT Gateway (Network Address Translation):** A managed outbound-only proxy allowing instances in private subnets to download patches from the internet while blocking any external inbound connections.
+- **Stateful vs Stateless (SG vs NACL):** Security Groups are stateful (auto-approving response traffic at instance level); Network ACLs are stateless (requiring both inbound and outbound rules explicitly defined at subnet level).
+

@@ -68,6 +68,13 @@ gh run view <run-id> --log
 gh workflow list
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `act --list`: Uses `nektos/act` (local GitHub Actions emulator powered by Docker) to inspect and list all workflows in `.github/workflows/` and view which jobs would execute locally without pushing to GitHub.
+- `gh workflow run build.yml`: Uses the official GitHub CLI (`gh`) to manually trigger a workflow that has the `workflow_dispatch` trigger configured.
+- `gh run list`: Lists recent workflow execution runs across all branches in the repository, showing status (`success`, `failure`, `in_progress`), branch, and run ID.
+- `gh run view <run-id> --log`: Streams or dumps the terminal execution logs for a specific workflow run ID directly to your local terminal for rapid debugging.
+- `gh workflow list`: Shows all registered workflow files in the repository and their enabled/disabled state.
+
 ---
 
 ## Workflow Triggers
@@ -104,6 +111,15 @@ A: Store the secret in GitHub repository Settings > Secrets and variables > Acti
 
 Q: Your workflow runs for 45 minutes but only 5 minutes of that is actual work. How do you speed it up?
 A: Use caching with `actions/cache` to cache dependencies (node_modules, pip packages, Maven repository). Split independent jobs and run them in parallel using `needs` correctly. Use matrix builds only when necessary.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **CI vs CD:** Continuous Integration automatically builds and tests every code push; Continuous Delivery guarantees code is packaged and ready to deploy at any moment; Continuous Deployment automatically ships passing builds directly into live production without human intervention.
+- **Workflow:** An automated end-to-end process defined in a YAML file in `.github/workflows/`.
+- **Runner:** The compute machine (virtual machine running Ubuntu, macOS, or Windows Server) that provisions an environment, clones the code, and runs steps.
+- **Matrix Build:** A technique in GitHub Actions to run the same job concurrently across multiple OS environments or language versions (e.g. Node 18, 20 and Python 3.10, 3.11).
+- **Artifact:** A file or collection of files (binaries, test reports, tarballs) produced during a workflow run that can be saved and downloaded or passed to another job.
 
 ---
 

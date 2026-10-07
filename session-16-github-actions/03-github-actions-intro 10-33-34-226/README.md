@@ -58,6 +58,9 @@ Create the directory:
 mkdir -p .github/workflows
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `mkdir -p .github/workflows`: Creates the hidden directory `.github` and subfolder `workflows` if they don't exist (`-p` handles parent folder creation and avoids errors if already existing).
+
 Create the file `.github/workflows/hello.yml`:
 
 ```yaml
@@ -80,6 +83,11 @@ git add .github/
 git commit -m "Add hello world workflow"
 git push
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `git add .github/`: Stages the `.github` directory and workflow file into Git index.
+- `git commit -m "Add hello world workflow"`: Records the staged changes as a new commit.
+- `git push`: Transmits commits to the GitHub repository, which fires a push webhook triggering the `say-hello` job.
 
 ---
 
@@ -144,7 +152,16 @@ Step           = single command or action
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **Webhook Trigger:** An automated HTTP POST payload sent by GitHub to its internal Actions engine whenever an event (like `git push`) occurs.
+- **Workflow Run:** A single execution instance of a workflow responding to an event trigger.
+- **Console Log Streaming:** Real-time terminal output captured from each step on the runner and viewable in the GitHub browser UI.
+- **Managed Runner Service:** Zero-maintenance infrastructure where GitHub provisions, patches, networks, and tears down the runner machines automatically.
+
+---
+
 ## Reference
 
 * **GitHub Actions quickstart:** https://docs.github.com/en/actions/quickstart
 * **GitHub Actions marketplace:** https://github.com/marketplace?type=actions
+

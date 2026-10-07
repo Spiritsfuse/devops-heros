@@ -78,11 +78,19 @@ echo -n "yatri_production_db" | base64
 # Output: eWF0cmlfcHJvZHVjdGlvbl9kYg==
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `echo -n`: Outputs text without appending a trailing newline (`\n`). This flag is essential—if omitted, the invisible newline character gets encoded into the hash, causing password authentication checks to fail in production.
+* `| base64`: Pipes the stdout of `echo` into the `base64` utility, which encodes binary/raw ASCII data into RFC 4648 standard base64 format.
+
 ### Apply and Inspect
 ```bash
 kubectl apply -f secret/db-secret.yaml
 kubectl get secret yatri-db-secret
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f secret/db-secret.yaml`: Transmits the base64-encoded Secret manifest to the API server for persistence into etcd.
+* `kubectl get secret <name>`: Verifies creation of the Secret, displaying its type (`Opaque`) and the count of stored credentials (`DATA: 3`).
 
 Expected Output:
 ```text
@@ -97,6 +105,10 @@ Notice: `kubectl describe secret` masks all values with `[3 bytes]` to prevent a
 kubectl get secret yatri-db-secret -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 --decode
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get secret ... -o jsonpath='{.data.POSTGRES_PASSWORD}'`: Extracts just the encoded string from the `POSTGRES_PASSWORD` key.
+* `| base64 --decode`: Decodes the piped base64 string back into human-readable plaintext (`secretpassword`) on your terminal console.
+
 Output:
 ```text
 secretpassword
@@ -106,3 +118,15 @@ secretpassword
 ```bash
 kubectl delete secret yatri-db-secret
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete secret <name>`: Destroys the secret resource. Any running pods referencing this secret will fail if restarted or rescheduled.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Secret (type: Opaque):** The default Kubernetes Secret type used for arbitrary user-defined sensitive key-value pairs (passwords, tokens, API keys).
+* **Base64 Encoding vs Encryption:** Base64 is an *encoding* scheme designed to represent binary data in an ASCII string format; it provides **zero** cryptographic secrecy. True security requires Kubernetes RBAC and etcd encryption-at-rest.
+* **stringData:** A write-only convenience field in Secret manifests allowing you to provide plain-text strings directly; Kubernetes automatically encodes them into base64 upon creation.
+* **etcd Encryption at Rest:** A Kubernetes security configuration using `EncryptionConfiguration` to encrypt Secret resources with AES-CBC or KMS keys before writing to the etcd disk.
+* **imagePullSecrets:** A specialized Secret (type `kubernetes.io/dockerconfigjson`) containing credentials (username, password/token, server URL) used by kubelet to authenticate against private container registries (ECR, GCR, Docker Hub).

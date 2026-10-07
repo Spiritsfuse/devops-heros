@@ -1,5 +1,9 @@
 # Session 6: Docker Fundamentals - Hello World Web Applications
 
+## Student Information
+- **Name:** Dhruv Sharma
+- **Enrollment Number (Roll No):** 24BCS10294
+
 ## Task Overview
 This project demonstrates containerizing web applications across multiple programming languages, runtimes, and web servers using Docker. Each application is isolated with its own `Dockerfile`, built into a lightweight Docker image, and run as a container serving a "Hello World" webpage.
 

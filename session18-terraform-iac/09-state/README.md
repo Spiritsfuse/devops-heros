@@ -81,6 +81,13 @@ terraform show
 terraform state pull
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform state pull`: Downloads and streams the raw JSON state payload from the local or configured remote backend directly to STDOUT.
+- `terraform state list`: Scans the state file and outputs a clean list of all resource address identifiers managed by this project.
+- `terraform state show <address>`: Prints the detailed state entry, attributes, and tags for a specific target resource address without dumping the entire state.
+- `terraform state rm <address>`: Removes a resource from Terraform's tracking without deleting the real resource from the cloud provider (useful when transferring ownership).
+- `terraform state mv <source> <dest>`: Renames a resource in the state file to match refactored code without triggering resource destruction and re-creation.
+
 This prints the current state as JSON.
 
 ## Important Security Rule
@@ -138,6 +145,16 @@ Expected:
 
 No managed resources should remain.
 
+---
+
+### 📚 Tech Jargons Demystified:
+- **Terraform State File (`terraform.tfstate`):** The single source of truth mapping your declared HCL configuration code to actual cloud resource IDs, sensitive attributes, and dependency graphs.
+- **Remote Backend (S3 + DynamoDB):** Storing the state file in a remote shared cloud bucket (e.g. AWS S3) with state locking (via DynamoDB) to prevent concurrent executions and state corruption across teams.
+- **State Locking:** A safety mechanism preventing two engineers or CI/CD pipelines from running `apply` or modifying the state file simultaneously.
+- **Drift Detection:** Comparing the state file against real-time cloud provider APIs (via automatic state refresh) to detect changes made outside of Terraform.
+
+---
+
 ## Exercise
 
 1. Run `terraform apply`.
@@ -149,3 +166,4 @@ No managed resources should remain.
 7. Apply it.
 8. Run `terraform show`.
 9. Destroy the resource.
+

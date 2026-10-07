@@ -1,9 +1,9 @@
-# Session 17: Complete CI/CD & DevSecOps – Assignment
+# Session 17: Complete CI/CD & DevSecOps - Assignment
 
 ## Student Information
 - **Name:** Dhruv Sharma
 - **Enrollment Number (Roll No):** 24BCS10294
-- **Session:** Session 17 – DevSecOps: Security Scanning, Compliance & Secure CI/CD Automation
+- **Session:** Session 17 - DevSecOps: Security Scanning, Compliance & Secure CI/CD Automation
 - **Repository:** `devops-heros/session-17-devsecops`
 
 ---
@@ -120,27 +120,20 @@ The workflow executes:
 
 ---
 
-## Screenshot Placeholders & Deliverables Checklist
+## Screenshot Evidences & Deliverables Checklist
 
-### Screenshot Placeholders:
-1. **Pipeline Execution Overview**:
+### Screenshots & Evidences:
+1. **DevSecOps Pipeline Execution Overview (7/7 Jobs Green)**:
    ![DevSecOps Pipeline Overview](screenshots/01-devsecops-pipeline-overview.png)
-   *(Screenshot of all jobs running in GitHub Actions)*
-2. **SAST CodeQL Scan**:
+
+2. **SAST CodeQL Automated Security Scan**:
    ![CodeQL Results](screenshots/02-sast-codeql-results.png)
-   *(Screenshot showing CodeQL security findings or clean scan)*
-3. **SCA Dependency Audit**:
-   ![SCA Scan](screenshots/03-sca-dependency-scan.png)
-   *(Screenshot showing pip-audit / Trivy filesystem scan)*
-4. **Secret Scanning**:
-   ![Secret Scanning](screenshots/04-secret-scanning-gitleaks.png)
-   *(Screenshot showing Gitleaks verification)*
-5. **Container Image Scan & Security Gate**:
-   ![Trivy Scan](screenshots/05-trivy-container-scan.png)
-   *(Screenshot showing Trivy container analysis)*
-6. **Kubernetes Rollout**:
-   ![K8s Deployment](screenshots/07-kubernetes-deployment.png)
-   *(Screenshot showing `kubectl rollout status deployment/python-app`)*
+
+3. **Container Image Vulnerability Scan (Trivy)**:
+   ![Trivy Scan](screenshots/03-trivy-container-image-scan.png)
+
+4. **Secret Scanning & DockerHub Token Configuration**:
+   ![Secret Scanning & Token](screenshots/04-secret-scanning-dockerhub-token.png)
 
 | Deliverable | Location | Status |
 | :--- | :--- | :---: |

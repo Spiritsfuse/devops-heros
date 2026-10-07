@@ -18,6 +18,9 @@ Kubernetes commonly exposes container output written to standard output and stan
 kubectl apply -f pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pod.yaml`: Deploys the logging demo pod which writes status messages periodically to stdout.
+
 Expected output:
 
 ```text
@@ -47,6 +50,9 @@ logs-demo   1/1     Running   0          10s
 kubectl logs logs-demo
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl logs logs-demo`: Connects to the kubelet on the node hosting `logs-demo` and retrieves the captured JSON/CRI log files written to `/var/log/pods/...`.
+
 Expected output:
 
 ```text
@@ -69,9 +75,9 @@ Run:
 kubectl logs -f logs-demo
 ```
 
-`-f` means follow. You can watch new logs as the application produces them.
-
-Press `Ctrl + C` to stop following.
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl logs -f logs-demo`: Flag `-f` (`--follow`) streams log lines continuously to your terminal stdout, similar to Linux `tail -f`.
+* Press `Ctrl + C` to stop following.
 
 ---
 
@@ -111,6 +117,9 @@ If a container has crashed and restarted, try:
 kubectl logs <pod-name> --previous
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl logs <pod-name> --previous`: Flag `--previous` (`-p`) dumps stdout/stderr from the *dead container instance that just crashed* instead of the newly restarted container instance. Crucial for debugging ephemeral application crashes.
+
 This is very useful for `CrashLoopBackOff` problems.
 
 ---
@@ -122,6 +131,9 @@ If a Pod has multiple containers:
 ```bash
 kubectl logs <pod-name> -c <container-name>
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `-c <container-name>`: Scopes logs to a single container. If a pod contains both an `app` container and an `istio-proxy` or `logging-agent` sidecar, omitting `-c` causes kubectl to error with `choose one of: [app sidecar]`.
 
 Example:
 
@@ -138,7 +150,14 @@ kubectl logs logs-demo
 kubectl logs -f logs-demo
 kubectl logs logs-demo --previous
 kubectl logs logs-demo -c app
+kubectl logs logs-demo --tail=50
+kubectl logs logs-demo --since=10m --timestamps
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `--tail=50`: Displays only the last 50 lines of logs, avoiding terminal flooding from high-traffic pods.
+* `--since=10m`: Filters logs emitted within the past 10 minutes (supports `s`, `m`, `h`).
+* `--timestamps`: Prefixes each output line with RFC3339 UTC timestamp, allowing precise correlation with cluster events.
 
 ---
 
@@ -161,3 +180,10 @@ Logs are often the first place to look when an application is crashing or behavi
 
 * **Kubernetes Logging Architecture:**  
   https://kubernetes.io/docs/concepts/cluster-administration/logging/
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Container Logging (stdout / stderr):** Best practice dictates applications inside Docker/Kubernetes write logs to standard output rather than local disk files. The container engine handles serialization to host disk files (`/var/log/pods`).
+* **Log Rotation:** Kubelet periodically rotates log files when they reach maximum size (e.g. 10MB) to prevent worker node disk exhaustion (`DiskPressure`).
+* **Log Aggregation:** Production clusters use daemonsets (Fluentd, Promtail, Vector) to ship container logs to centralized indexed search engines (Elasticsearch, Grafana Loki, AWS CloudWatch).

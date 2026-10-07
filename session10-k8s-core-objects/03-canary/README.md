@@ -82,20 +82,37 @@ Kubernetes Services use **round-robin** load balancing across all matching pod e
 kubectl apply -f 03-canary/deployment-stable.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `apply -f`: Creates the baseline production deployment running 9 replicas of stable v1 code.
+- Label: `app=myapp-canary,track=stable,version=v1`.
+
 Wait until all 9 stable pods are running:
 ```bash
 kubectl rollout status deployment/app-stable
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `rollout status`: Blocks until all 9 pods pass their readiness checks, ensuring baseline stability before routing any traffic.
 
 ### Step 2: Deploy the Service
 ```bash
 kubectl apply -f 03-canary/service.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- Notice that the Service selector is intentionally configured as `app: myapp-canary`.
+- It does **not** specify `track` or `version`. Therefore, any pod carrying `app=myapp-canary` will be added to the service endpoint pool!
+
 ### Step 3: Test — All Traffic Goes to Stable v1
 ```bash
 for i in $(seq 1 10); do curl -s http://$(minikube ip):30030 | grep -o "STABLE v1\|CANARY v2"; done
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `for i in $(seq 1 10); do ... done`: Bash for-loop iterating 10 times.
+- `curl -s`: Silent HTTP GET request against the NodePort service.
+- `grep -o "STABLE v1\|CANARY v2"`: Extracts and outputs only the matching version string pattern using regex alternation (`\|`).
+- Proves 100% of the traffic lands on stable v1 because no canary pods exist yet.
 
 Expected output (10 out of 10 requests hit stable):
 ```text
@@ -116,10 +133,17 @@ STABLE v1
 kubectl apply -f 03-canary/deployment-canary.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- Spawns exactly 1 replica running the new v2 candidate image with labels `app=myapp-canary,track=canary,version=v2`.
+- Because this pod has `app=myapp-canary`, Kubernetes automatically adds its IP to the Service's 10-endpoint pool, achieving an automatic **90/10 traffic split** via round-robin kube-proxy load balancing!
+
 Wait until the canary pod is running:
 ```bash
 kubectl get pods -l app=myapp-canary --show-labels
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- Displays all 10 pods, clearly delineating the 9 stable pods from the 1 canary pod by label.
 
 Expected output (9 stable + 1 canary = 10 pods total):
 ```text
@@ -135,6 +159,10 @@ app-canary-9b6d4e7c8-5fmpx    1/1     Running   app=myapp-canary,track=canary,ve
 ```bash
 for i in $(seq 1 20); do curl -s http://$(minikube ip):30030 | grep -o "STABLE v1\|CANARY v2"; done
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- Sends 20 requests in sequence.
+- Statistically, with 10 total pods in the endpoint list, approximately 10% (1 in 10, or 2 in 20) route to the canary pod.
 
 Expected output (approximately 1-2 canary hits out of 20):
 ```text
@@ -166,6 +194,10 @@ kubectl scale deployment app-canary --replicas=3
 kubectl scale deployment app-stable --replicas=7
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `scale deployment ... --replicas=<num>`: Adjusts pod counts to shift the traffic weighting from 90/10 to 70/30.
+- 3 canary pods + 7 stable pods = 30% canary traffic.
+
 Verify endpoints updated:
 ```bash
 kubectl get endpoints myapp-canary-service
@@ -185,6 +217,9 @@ kubectl scale deployment app-canary --replicas=9
 kubectl scale deployment app-stable --replicas=0
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- When metric error rates on canary are verified clean, scale the canary deployment up to full capacity (`--replicas=9`) and scale stable down to 0.
+
 All 10 requests now hit v2:
 ```bash
 for i in $(seq 1 5); do curl -s http://$(minikube ip):30030 | grep -o "STABLE v1\|CANARY v2"; done
@@ -202,6 +237,9 @@ kubectl scale deployment app-canary --replicas=0
 kubectl scale deployment app-stable --replicas=9
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- If the canary throws 500 errors or high latency in APM/Prometheus, immediately zero out the canary replicas (`--replicas=0`) and scale stable back to 9. The blast radius was restricted to only a tiny fraction of user requests.
+
 All traffic instantly returns to v1 stable:
 ```bash
 for i in $(seq 1 5); do curl -s http://$(minikube ip):30030 | grep -o "STABLE v1\|CANARY v2"; done
@@ -216,3 +254,16 @@ kubectl delete -f 03-canary/service.yaml
 kubectl delete -f 03-canary/deployment-canary.yaml
 kubectl delete -f 03-canary/deployment-stable.yaml
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- Tears down the service and both stable and canary deployments, returning the cluster to a clean slate.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Canary Release**: Named after coal miners using canaries to detect toxic gas; deploying a new release to a small subset of live users to detect bugs early before full rollout.
+- **Blast Radius**: The maximum extent of damage or user disruption caused if a failure occurs (canary minimizes blast radius to ~5-10% of users).
+- **Traffic Weighting**: Distributing incoming requests across multiple backend versions according to specific ratios (e.g. 90% stable, 10% canary). In pure Kubernetes, this is achieved by the ratio of pod replicas; in service meshes (like Istio/Linkerd), it can be achieved by HTTP header/percentage rules.
+- **Promotion vs Abort**:
+  - *Promotion*: Scaling the canary to 100% and decommissioning the old release.
+  - *Abort*: Immediately scaling the canary to 0 replicas to protect users.

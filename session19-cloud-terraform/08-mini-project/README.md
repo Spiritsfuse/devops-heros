@@ -201,6 +201,11 @@ aws ec2 describe-security-groups \
   --query 'SecurityGroups[].{GroupId:GroupId,VpcId:VpcId}'
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `aws ec2 describe-security-groups`: Queries the security group by `group-name` to inspect its ID, assigned VPC, and firewall ingress/egress rules.
+- `terraform state list`: Confirms that all 6 foundational network objects (`aws_vpc`, `aws_subnet`, `aws_internet_gateway`, `aws_route_table`, `aws_route_table_association`, `aws_security_group`) are active in the state file.
+- `terraform plan -destroy`: Audits the teardown plan to ensure no production resources outside this specific module are affected before destroying.
+
 ---
 
 # Cleanup
@@ -247,6 +252,14 @@ Questions to think about:
 5. Why should SSH not normally be open to `0.0.0.0/0`?
 
 Do not add EC2 until the VPC lab works.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Foundational VPC Stack:** The minimal production set of AWS networking components needed to host secure internet-facing workloads (VPC + Subnet + IGW + Route Table + Association + Security Group).
+- **Public Subnet Criteria:** A subnet is only truly public if: (1) its route table points `0.0.0.0/0` to an Internet Gateway, AND (2) instances launched within it are assigned a Public IPv4 address (`map_public_ip_on_launch = true`).
+- **Security Group Chaining:** Referencing one security group ID directly inside another security group's ingress rule, permitting communication only between designated application tiers (e.g. ALB to EC2).
+- **Zero-Trust Network Partitioning:** Placing databases and application logic in private subnets with no internet routes, exposing only load balancers in public subnets.
 
 ---
 

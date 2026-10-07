@@ -61,6 +61,13 @@ terraform plan
 terraform apply
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform init`: Initializes working directory containing Terraform configuration files; downloads required provider plugins (e.g. AWS provider) into `.terraform/` and sets up the backend.
+- `terraform fmt`: Rewrites Terraform configuration files to canonical HCL format and style standards (consistent indentation and alignment).
+- `terraform validate`: Verifies syntax correctness and internal consistency of attribute names and types without contacting cloud APIs.
+- `terraform plan`: Generates and prints an execution plan showing what actions Terraform will take to reach the desired state (resources to add `+`, change `~`, or destroy `-`).
+- `terraform apply`: Executes the actions proposed in the plan to create, modify, or delete real infrastructure on the cloud provider. Prompts for manual confirmation (`yes`) before making changes.
+
 Enter:
 
 ```text
@@ -88,6 +95,10 @@ terraform output bucket_name
 terraform state list
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform output bucket_name`: Extracts and displays the value of the specified root module output variable from the state file.
+- `terraform state list`: Lists all resource addresses currently recorded and tracked inside the local or remote `terraform.tfstate` database.
+
 Expected:
 
 ```text
@@ -100,14 +111,28 @@ aws_s3_bucket.iac_demo
 terraform destroy
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform destroy`: Reads the state file and tears down all managed infrastructure resources in reverse dependency order, prompting for confirmation (`yes`).
+
 Enter:
 
 ```text
 yes
 ```
 
+---
+
+### 📚 Tech Jargons Demystified:
+- **Declarative Infrastructure:** Declaring *what* the desired end-state should be (e.g., "I need an S3 bucket with tag 'dev'"), leaving Terraform to figure out the exact API calls (*how*) needed to reach that state.
+- **Provider Plugin:** An executable binary distributed via the Terraform Registry that translates HCL resource declarations into target cloud API requests (e.g., AWS, Azure, GCP, Kubernetes).
+- **Execution Plan:** An immutable blueprint comparing current state with desired configuration before applying modifications, preventing accidental destructive changes.
+- **State File (`terraform.tfstate`):** A JSON database mapping declared Terraform resource IDs to real-world cloud provider resource identifiers and metadata.
+
+---
+
 ## Practice Questions:
 
 1. What happens if 10 engineers manually create the same infrastructure?
 2. How can Git help with infrastructure?
 3. What happens if we need the same infrastructure in another environment?
+

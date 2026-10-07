@@ -12,11 +12,17 @@ ImagePullBackOff
 kubectl apply -f broken-pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f broken-pod.yaml`: Deploys a pod referencing an invalid, non-existent Docker image tag (`nginx:this-image-does-not-exist`).
+
 Check:
 
 ```bash
 kubectl get pod image-demo
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pod image-demo`: Observes status transition from `ContainerCreating` to `ErrImagePull`, and shortly afterward to `ImagePullBackOff`.
 
 You may see:
 
@@ -69,6 +75,9 @@ Run:
 kubectl describe pod image-demo
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe pod image-demo`: Checks the `Events:` log at the bottom. Kubelet prints the exact error response returned by the container registry (e.g. `Failed to pull image "nginx:...": rpc error: code = NotFound desc = failed to pull and unpack image ...: not found`).
+
 Go to the **Events** section. You should see a message similar to:
 
 ```text
@@ -99,11 +108,17 @@ Delete the broken Pod:
 kubectl delete pod image-demo
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete pod image-demo`: Deletes the failing pod to stop backoff pull retries.
+
 Apply the fixed YAML:
 
 ```bash
 kubectl apply -f fixed-pod.yaml
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f fixed-pod.yaml`: Applies the corrected manifest with a valid image tag (`nginx:alpine`). Kubelet successfully pulls the layers and launches the container.
 
 Check:
 
@@ -176,3 +191,16 @@ ImagePullBackOff
 
 * **Pull an Image from a Private Registry:**  
   https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **ErrImagePull vs ImagePullBackOff:**
+  * `ErrImagePull`: The immediate error state returned on the first failed image download attempt.
+  * `ImagePullBackOff`: The delayed retry state where kubelet waits progressively longer periods before attempting the pull again.
+* **imagePullPolicy:**
+  * `Always`: Kubelet queries the remote registry on every pod startup (default if tag is `:latest`).
+  * `IfNotPresent`: Pulls only if the image does not already exist on the local worker node.
+  * `Never`: Expects the image to be pre-loaded on the node; fails if absent.
+* **imagePullSecrets:** Kubernetes secret specifying authentication credentials (username and access token) required to pull images from private registries (Docker Hub private repos, AWS ECR, GCP Artifact Registry).
+* **Registry Rate Limiting:** Docker Hub imposes anonymous pull rate limits (100 pulls per 6 hours). Exceeding this triggers `ImagePullBackOff` with `toomanyrequests: You have reached your pull rate limit`.

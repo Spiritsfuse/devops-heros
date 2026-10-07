@@ -137,3 +137,21 @@ aws s3 rm s3://spirits5510/builds/app.zip
 # Remove an entire bucket and all its contents
 aws s3 rb s3://spirits5510 --force
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `aws s3 ls`: Lists all S3 buckets in your AWS account or directory prefixes inside a bucket.
+- `aws s3 mb s3://<bucket> --region <region>`: "Make bucket". Provisions a brand-new S3 bucket in the specified AWS geographical region.
+- `aws s3 cp <src> <dest>`: Copies files between local disks and S3 buckets, or bucket-to-bucket.
+- `aws s3 sync ./dist s3://...`: Compares modified timestamps and file sizes, uploading only changed or new files recursively to minimize network data transfer.
+- `aws s3api head-bucket`: Determines if a bucket exists and you have access permissions without querying contents.
+- `aws s3 rm`: Removes an object from the bucket.
+- `aws s3 rb --force`: "Remove bucket". Deletes the bucket; the `--force` flag first empties all objects inside the bucket before destroying it.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Object Storage vs Block Storage:** Object storage (S3) manages data as flat files with rich metadata accessed over HTTP REST APIs; block storage (EBS) manages raw sectors directly attached to an OS filesystem.
+- **11 9's of Durability (99.999999999%):** Statistical probability that an object will not be lost across a year; achieved by S3 automatically replicating objects redundantly across at least 3 physical Availability Zones.
+- **Delete Marker:** A dummy placeholder object inserted by S3 Versioning when an object is deleted, preventing permanent data loss.
+- **S3 Intelligent-Tiering:** An autonomous storage class that monitors access frequencies and shifts objects between frequent and infrequent tiers without retrieval fees.
+

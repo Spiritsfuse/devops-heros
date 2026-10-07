@@ -56,11 +56,19 @@ replicas: 2
 kind create cluster --name session20
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `kind`: Tool for spinning up Kubernetes nodes inside local Docker containers.
+- `create cluster`: Spawns the Docker container control plane and installs Kubernetes core binaries (`kube-apiserver`, `etcd`, `kubelet`).
+- `--name session20`: Names the cluster and sets your active `kubectl` context to `kind-session20`.
+
 Check:
 
 ```bash
 kubectl get nodes
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get nodes`: Contacts the control plane to list all cluster nodes and verify that the status is `Ready`.
 
 Expected:
 
@@ -77,6 +85,9 @@ session20-control-plane
 kubectl create namespace argocd
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `create namespace argocd`: Creates a dedicated namespace boundary inside Kubernetes to isolate all Argo CD components.
+
 Then:
 
 ```bash
@@ -84,11 +95,18 @@ kubectl apply -n argocd \
   -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `apply -n argocd`: Executes declarative installation of Argo CD inside the `argocd` namespace.
+- `-f <url>`: Pulls and applies official upstream installation manifests containing CRDs, RBAC roles, deployments, services, and configmaps.
+
 Wait:
 
 ```bash
 kubectl get pods -n argocd
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get pods -n argocd`: Lists the running state of Argo CD controller pods (e.g. `repo-server`, `application-controller`, `server`). Wait until all show status `Running`.
 
 ---
 
@@ -146,11 +164,19 @@ Apply the Argo CD Application:
 kubectl apply -f app/argocd-application.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `apply -f app/argocd-application.yaml`: Registers the custom `Application` resource with Argo CD's controller, binding the remote Git repo to the local Kubernetes cluster.
+
 Check:
 
 ```bash
 kubectl get applications -n argocd
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get applications -n argocd`: Checks the GitOps reconciliation engine status.
+  - `SYNC STATUS Synced`: Live cluster objects match the git commit tree.
+  - `HEALTH STATUS Healthy`: Workload pods are running and ready.
 
 Expected shape:
 
@@ -166,6 +192,10 @@ session20-mini   Synced        Healthy
 ```bash
 kubectl get all -n session20
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get all`: A composite query fetching all common resources at once: Pods, Services, Deployments, and ReplicaSets.
+- `-n session20`: Scopes the query to the application's runtime namespace.
 
 You should see:
 
@@ -200,11 +230,19 @@ git commit -m "Scale application to three replicas"
 git push
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `git add .`: Stages the modified `deployment.yaml` with `replicas: 3`.
+- `git commit -m "..."`: Records the scale-out intent in git history.
+- `git push`: Publishes the commit to GitHub/GitLab, updating the remote Source of Truth.
+
 Watch:
 
 ```bash
 kubectl get deployment -n session20 -w
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `-w` (or `--watch`): Streams deployment status updates continuously. You will watch the `AVAILABLE` and `READY` columns transition dynamically from `2/2` -> `2/3` -> `3/3` as the newly scheduled pod passes its container readiness probe.
 
 Eventually:
 
@@ -238,11 +276,20 @@ kubectl scale deployment session20-mini \
   --replicas=1
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `scale`: Imperatively alters the replica count directly on the live Kubernetes cluster.
+- `--replicas=1`: Artificially forces the cluster to shrink down to 1 pod.
+- **Why we run this**: This simulates **unauthorized manual drift** (e.g. an operator making an emergency manual change in production).
+- **The Self-Healing Magic**: Because `selfHeal: true` is enabled in `argocd-application.yaml`, Argo CD constantly compares live cluster state against Git. It immediately catches that live has `1` replica while Git specifies `3`, flags the cluster as `OutOfSync`, and forcefully reconciles the deployment back to `3` replicas!
+
 Check:
 
 ```bash
 kubectl get deployment -n session20
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get deployment -n session20`: Verifies that Argo CD reversed the manual change, restoring 3 active replicas automatically without human intervention.
 
 Because Git still says:
 
@@ -274,17 +321,26 @@ Check application logs:
 kubectl logs deployment/session20-mini -n session20
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `logs deployment/session20-mini`: Streams logs from pods backing the deployment to verify healthy request serving and catch any application runtime errors.
+
 Check resources:
 
 ```bash
 kubectl get pods -n session20
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get pods -n session20`: Verifies all 3 pods are in `Running` state with 0 restarts.
+
 Check Argo CD:
 
 ```bash
 kubectl get application session20-mini -n argocd
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get application session20-mini -n argocd`: Checks the high-level GitOps custom resource status. Ensures both sync status is `Synced` and health is `Healthy`.
 
 ---
 
@@ -344,11 +400,17 @@ Delete the application:
 kubectl delete -f app/argocd-application.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `delete -f app/argocd-application.yaml`: Removes the Argo CD `Application` custom resource. Argo CD automatically prunes and cascades deletion to all managed Kubernetes workloads in `session20`.
+
 Delete the cluster:
 
 ```bash
 kind delete cluster --name session20
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `kind delete cluster`: Destroys the `session20-control-plane` Docker container, freeing host RAM and CPU, and removes the kubeconfig cluster context.
 
 ---
 
@@ -392,3 +454,11 @@ And the most important GitOps loop:
                               |
                               +----> back to desired state
 ```
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Declarative GitOps**: Describing the end state in version control rather than executing manual scripts. If a server crashes, the entire stack can be recreated deterministically from Git in minutes.
+- **Drift Detection**: The monitoring process by which a controller discovers differences between the declared state in Git and the running environment.
+- **Self-Healing**: Automated corrective action taken by the controller to eliminate drift and restore the system to match Git without human intervention.
+- **Reconciliation Loop**: The core control cycle: `Observed State` vs `Target State` -> `Actuate changes until Target State == Observed State`.

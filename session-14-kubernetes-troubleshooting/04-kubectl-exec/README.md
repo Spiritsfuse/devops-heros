@@ -17,6 +17,9 @@ Think of it as:
 kubectl apply -f pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pod.yaml`: Deploys the Nginx container workload to be used for container shell debugging.
+
 Check:
 
 ```bash
@@ -39,6 +42,13 @@ Run:
 ```bash
 kubectl exec -it exec-demo -- bash
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl exec`: Invokes the container runtime's exec mechanism through the kubelet over a SPDY/WebSocket stream.
+* `-i` (`--stdin`): Passes stdin to the container, keeping user keyboard input open.
+* `-t` (`--tty`): Allocates a pseudo-terminal/TTY inside the container so you get a command prompt, line wrapping, and interactive colored output.
+* `--`: Positional parameter delimiter in bash/CLI. Tells kubectl: "Everything to the left is kubectl flags; everything to the right is the command to run inside the container".
+* `bash`: Launches the Bourne-Again SHell inside the container (fallback to `sh` if the image is Alpine-based).
 
 You should get a shell inside the container. You may see:
 
@@ -82,6 +92,10 @@ You can also try:
 nginx -T
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `curl localhost`: Bypasses external network, Kubernetes Services, and ingress to test if the web application daemon is bound and listening on its loopback port.
+* `nginx -T`: Validates and dumps the entire running Nginx configuration, including all include directives and virtual host blocks.
+
 to inspect Nginx configuration.
 
 ---
@@ -109,6 +123,9 @@ Or:
 ```bash
 kubectl exec exec-demo -- ls /usr/share/nginx/html
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl exec <pod> -- <command>`: Non-interactive execution. Does not allocate a TTY (`-t` omitted), captures raw standard output directly to your local terminal, making it ideal for automation scripts.
 
 ---
 
@@ -155,6 +172,9 @@ kubectl describe
 kubectl debug
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl debug -it <pod-name> --image=nicolaka/netshoot`: Injects an ephemeral diagnostic container (packed with `tcpdump`, `curl`, `dig`, `ip`) into the running pod's network namespace without altering or restarting existing containers.
+
 ---
 
 ## Useful Commands
@@ -187,3 +207,11 @@ Kubernetes documentation also recommends `kubectl exec` for running commands ins
 
 * **Get a Shell to a Running Container:**  
   https://kubernetes.io/docs/tasks/debug/debug-application/get-shell-running-container/
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **SPDY / WebSocket Connection:** The duplex streaming protocol used by `kubectl exec` to establish real-time terminal I/O streams between the client CLI, the API server, and node kubelet.
+* **Double Dash (`--`) Syntax:** Standard POSIX argument separator. Without `--`, flags like `-l` or `-n` passed to the target container command could be misinterpreted by `kubectl` itself.
+* **Distroless Images:** Highly secure container images containing only your compiled binary with zero shell (`/bin/sh` / `/bin/bash`) or OS utilities. You cannot use `kubectl exec` on distroless containers—instead, use `kubectl debug` with ephemeral containers.
+* **Ephemeral Containers:** Lightweight temporary containers added to a running Pod via the `kubectl debug` API specifically designed for live interactive troubleshooting.

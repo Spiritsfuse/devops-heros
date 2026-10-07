@@ -161,3 +161,27 @@ aws ec2 start-instances --instance-ids i-0123456789abcdef0
 # Terminate an EC2 instance
 aws ec2 terminate-instances --instance-ids i-0123456789abcdef0
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `aws ec2 describe-instances`: Queries EC2 API for instances.
+  - `--filters "Name=instance-state-name,Values=running"`: Server-side filter to only return currently running instances.
+  - `--query "Reservations[*].Instances[*].[...]"`: JMESPath query expression selecting specific fields (Instance ID, type, IP, state).
+  - `--output table`: Renders results in an ASCII table instead of JSON.
+- `aws ec2 run-instances`: Launches one or more new virtual server instances.
+  - `--image-id`: The AMI identifier containing the pre-baked OS.
+  - `--instance-type t3.micro`: Hardware compute/memory profile.
+  - `--key-name`: Associated SSH key pair name for root authentication.
+  - `--security-group-ids`: Firewall rules controlling network packet access.
+- `aws ec2 stop-instances`: Gracefully halts instance CPU execution, preserving attached EBS volumes and stopping compute charges.
+- `aws ec2 terminate-instances`: Permanently deletes the instance and tears down its root EBS volume.
+- `chmod 400 my-key.pem`: Sets Unix permissions so that only the file owner has read access (`400` = `r--------`). SSH rejects private keys with looser permissions (`UNPROTECTED PRIVATE KEY FILE!`).
+- `ssh -i my-key.pem ubuntu@<IP>`: Initiates an SSH session using the private identity file (`-i`) connecting as the default user `ubuntu`.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **AMI (Amazon Machine Image):** An immutable pre-configured operating system image template used to launch virtual machine instances.
+- **Stateful Firewall (Security Group):** Tracks active network connections so return traffic is automatically allowed, regardless of inbound/outbound rules.
+- **EBS (Elastic Block Store):** High-speed block storage attached over the network to EC2 instances, persisting independently of instance reboots.
+- **Spot Instances:** Spare AWS compute capacity available at steep discounts (up to 90%), which AWS can reclaim with a 2-minute interruption notice.
+

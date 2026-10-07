@@ -73,6 +73,11 @@ kubectl get configmap yatri-app-config
 kubectl describe configmap yatri-app-config
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f configmap/app-config.yaml`: Submits the ConfigMap manifest to the API server, saving the plain-text key-value configuration into etcd.
+* `kubectl get configmap <name>`: Lists the specified ConfigMap, showing the number of data entries (`DATA: 5`) and age. Alias `cm` can be used (`kubectl get cm`).
+* `kubectl describe configmap <name>`: Dumps the complete internal breakdown of all stored configuration keys, values, and object metadata.
+
 Expected Output:
 ```text
 NAME               DATA   AGE
@@ -92,6 +97,11 @@ PORT:              5000
 ```bash
 kubectl get configmap yatri-app-config -o jsonpath='{.data.LOG_LEVEL}'
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get configmap ...`: Retrieves the ConfigMap resource.
+* `-o jsonpath='{.data.LOG_LEVEL}'`: Uses JSONPath query syntax to directly extract and print the exact value assigned to the `LOG_LEVEL` key (`INFO`) without parsing surrounding YAML/JSON metadata.
+
 Output:
 ```text
 INFO
@@ -101,3 +111,16 @@ INFO
 ```bash
 kubectl delete configmap yatri-app-config
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete configmap <name>`: Removes the ConfigMap from the cluster. Note that if active pods are currently referencing this ConfigMap via `configMapKeyRef` and restart, they will enter `CreateContainerConfigError` status until recreated.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **ConfigMap:** A Kubernetes API object used to store non-confidential data in key-value pairs. Pods can consume ConfigMaps as environment variables, command-line arguments, or as configuration files in a volume.
+* **12-Factor App (III. Config):** An industry software methodology stating that an application's configuration should be strictly separated from code, allowing the exact same build artifact/container image to run in dev, test, and production.
+* **envFrom vs valueFrom:**
+  * `envFrom`: Injects *all* key-value pairs from a ConfigMap as individual container environment variables at once.
+  * `valueFrom.configMapKeyRef`: Selectively pulls a *single* specific key from the ConfigMap into an environment variable.
+* **Immutable ConfigMap:** Setting `immutable: true` prevents accidental modifications to the ConfigMap in etcd and reduces load on the API server by eliminating automatic watch polling.

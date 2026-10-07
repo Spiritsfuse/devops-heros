@@ -1,9 +1,9 @@
-# Session 19: Cloud & Terraform in Action – Assignment
+﻿# Session 19: Cloud & Terraform in Action - Assignment
 
 ## Student Information
 - **Name:** Dhruv Sharma
 - **Enrollment Number (Roll No):** 24BCS10294
-- **Session:** Session 19 – Cloud Infrastructure Architecture & Terraform in Action
+- **Session:** Session 19 - Cloud Infrastructure Architecture & Terraform in Action
 - **Repository:** `devops-heros/session19-cloud-terraform`
 
 ---

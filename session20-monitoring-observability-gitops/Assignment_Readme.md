@@ -1,9 +1,9 @@
-# Session 20: Monitoring, Observability & GitOps – Assignment
+# Session 20: Monitoring, Observability & GitOps - Assignment
 
 ## Student Information
 - **Name:** Dhruv Sharma
 - **Enrollment Number (Roll No):** 24BCS10294
-- **Session:** Session 20 – Cloud Native Monitoring, Observability & GitOps Delivery
+- **Session:** Session 20 - Cloud Native Monitoring, Observability & GitOps Delivery
 - **Repository:** `devops-heros/session20-monitoring-observability-gitops`
 
 ---
@@ -174,22 +174,23 @@ spec:
 
 ## Screenshot Placeholders & Deliverables Checklist
 
-### Screenshot Placeholders:
-1. **Cluster Metrics (`kubectl top`)**:
-   ![Cluster Top Metrics](screenshots/01-metrics-server-top.png)
-   *(Run `kubectl top nodes` & `kubectl top pods`)*
-2. **Prometheus / Grafana Dashboard**:
-   ![Grafana Dashboard](screenshots/02-prometheus-grafana-dashboard.png)
-   *(Screenshot showing cluster resource monitoring dashboard)*
-3. **Argo CD Controller Installation**:
+### Screenshots & Evidences:
+1. **Prometheus Query & Metrics Collection**:
+   ![Prometheus Query](screenshots/prometheus_query.png)
+
+2. **Grafana Monitoring Dashboard**:
+   ![Grafana Dashboard](screenshots/grafana_dashboard.png)
+
+3. **Docker Compose Monitoring Stack (`docker compose ps`)**:
+   ![Docker Compose Services](screenshots/docker_compose_up_ps.png)
+
+4. **Argo CD Controller Installation & Cluster Status**:
    ![ArgoCD Install](screenshots/03-argocd-installation.png)
-   *(Screenshot showing `kubectl get pods -n argocd`)*
-4. **Argo CD Application Synced & Healthy**:
+   *(Screenshot showing `kubectl get pods -n argocd` or Argo CD UI)*
+
+5. **Argo CD Application Synced & Healthy**:
    ![ArgoCD Synced](screenshots/04-argocd-application-synced.png)
    *(Screenshot of Argo CD UI showing application in Synced and Healthy state)*
-5. **GitOps Self-Healing Verification**:
-   ![Self-Healing Trace](screenshots/05-gitops-auto-reconciliation.png)
-   *(Screenshot verifying automatic drift resolution)*
 
 | Deliverable | Location | Status |
 | :--- | :--- | :---: |

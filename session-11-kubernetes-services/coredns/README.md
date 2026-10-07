@@ -118,3 +118,33 @@ nslookup google.com
 # Inspect local resolver settings
 cat /etc/resolv.conf
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pods -n kube-system -l k8s-app=kube-dns`:
+  * `-n kube-system`: Targets the administrative namespace where core control plane and DNS pods run.
+  * `-l k8s-app=kube-dns`: Filters for CoreDNS pods (historically labeled `kube-dns` for backward compatibility). Verifies both replicas are in `Running` state.
+* `kubectl logs -n kube-system -l k8s-app=kube-dns --tail=50`:
+  * `logs -l`: Streams logs from all pods matching the label selector simultaneously.
+  * `--tail=50`: Limits output to the last 50 lines per container, highlighting recent crashes, loop warnings, or upstream DNS timeout errors.
+* `kubectl get svc,endpoints -n kube-system -l k8s-app=kube-dns`:
+  * `svc,endpoints`: Queries both Service and Endpoints resources in one command. Verifies that the `kube-dns` virtual IP has live target Pod IPs registered under `ENDPOINTS`. If endpoints are `<none>`, CoreDNS will fail to answer queries.
+* `kubectl run dns-test --image=registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3 -it --rm -- bash`:
+  * `run dns-test`: Generates and immediately runs a standalone one-off pod named `dns-test`.
+  * `--image=.../jessie-dnsutils:1.3`: Uses an image pre-packaged with DNS diagnostic tools (`nslookup`, `dig`, `host`).
+  * `-it`: Interactive mode with TTY attached for shell access.
+  * `--rm`: Ephemeral pod cleanup flag. Automatically deletes the pod from the cluster as soon as you exit the shell session (`exit`).
+* `nslookup <domain>`: Queries the DNS server for IP mappings.
+  * `kubernetes.default`: Tests bare two-part resolution to verify search path completion (`kubernetes.default.svc.cluster.local`).
+  * `google.com`: Tests the `forward` plugin to ensure cluster pods can resolve external internet domains via upstream host resolvers.
+* `cat /etc/resolv.conf`: Reads the Linux DNS client configuration injected by the kubelet. Typically contains:
+  * `nameserver 10.96.0.10`: The cluster IP of the `kube-dns` service.
+  * `search <namespace>.svc.cluster.local svc.cluster.local cluster.local`: Search domains tried in order for non-fully-qualified queries.
+  * `options ndots:5`: Instructs the resolver to append search domains if a queried name contains fewer than 5 dots.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **ndots:5:** A Linux DNS resolver rule injected into Kubernetes pods. If a queried domain name contains fewer than 5 dots (e.g. `api.github.com` has 2 dots), the OS attempts to resolve it against all cluster search domains first before issuing a public query, which can cause excessive DNS query amplification.
+* **Corefile:** The configuration file parsed by CoreDNS defining servers, ports, and execution chains of modular plugins (`kubernetes`, `cache`, `forward`, `loadbalance`).
+* **Loop Plugin:** A safety plugin in CoreDNS that detects DNS forwarding loops (e.g. CoreDNS forwarding to local host resolver which forwards back to CoreDNS). If a loop is detected, CoreDNS terminates with a fatal loop error to prevent CPU exhaustion.
+* **EndpointSlice:** A scalable Kubernetes resource replacing large single `Endpoints` objects by breaking backend Pod IP lists into smaller chunks of 100 endpoints each.

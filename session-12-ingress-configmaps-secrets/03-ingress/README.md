@@ -112,6 +112,11 @@ kubectl get ingress yatri-ingress
 kubectl describe ingress yatri-ingress
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f ingress/ingress-routes.yaml`: Submits the Ingress routing manifest. The active Ingress Controller (e.g. `ingress-nginx`) detects this resource via its API watch loop and dynamically reloads its Nginx routing table without restarting.
+* `kubectl get ingress <name>`: Summarizes the Ingress rule, displaying the ingress class (`nginx`), virtual hosts (`yatri.local`), and the bound gateway address/load balancer IP.
+* `kubectl describe ingress <name>`: Lists detailed path mappings, backend service associations, TLS configuration, and recent sync events from the Ingress Controller.
+
 Expected Output:
 ```text
 NAME            CLASS   HOSTS        ADDRESS        PORTS   AGE
@@ -132,6 +137,16 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -subj "/CN=campus.local/O=CampusDevOps"
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `openssl req`: CLI tool for generating PKCS#10 Certificate Signing Requests and generating X.509 self-signed certificates.
+* `-x509`: Directs OpenSSL to output a self-signed root certificate rather than a signing request.
+* `-nodes`: Short for "no DES". Generates the private key without encrypting it with a passphrase, allowing automated container servers (Nginx) to read it without manual password prompts during restart.
+* `-days 365`: Sets the validity duration of the certificate to 1 year.
+* `-newkey rsa:2048`: Generates a new 2048-bit RSA private key.
+* `-keyout tls.key`: The destination file path for the newly generated private key.
+* `-out tls.crt`: The destination file path for the signed public certificate.
+* `-subj "/CN=campus.local/O=CampusDevOps"`: Sets the X.500 Distinguished Name subject directly from CLI. `CN` (Common Name) defines the primary FQDN (`campus.local`), and `O` defines the Organization.
+
 ### Step 2: Create a Kubernetes TLS Secret
 Store the public certificate and private key inside Kubernetes as a `kubernetes.io/tls` Secret:
 
@@ -141,10 +156,18 @@ kubectl create secret tls campus-tls-cert \
   --key=tls.key
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl create secret tls <name>`: Imperative subcommand specifically formatting secrets for HTTPS/TLS endpoints (type `kubernetes.io/tls`).
+* `--cert=tls.crt`: Specifies the path to the public SSL/TLS certificate.
+* `--key=tls.key`: Specifies the path to the private key.
+
 Verify secret creation:
 ```bash
 kubectl get secret campus-tls-cert
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get secret campus-tls-cert`: Verifies secret storage, displaying `DATA: 2` (corresponding to the `tls.crt` and `tls.key` base64 entries).
 
 Expected Output:
 ```text
@@ -185,10 +208,32 @@ curl -k --resolve portal.campus.local:443:$INGRESS_IP https://portal.campus.loca
 curl -k --resolve api.campus.local:443:$INGRESS_IP https://api.campus.local/api/health
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `INGRESS_IP=$(kubectl ...)`: Queries the live Ingress status and stores the controller's external IP address in an environment variable.
+* `curl -k`: Flag `--insecure` (`-k`) allows curl to proceed with the TLS handshake even though our self-signed certificate is not signed by a recognized Certificate Authority (CA).
+* `--resolve <host>:<port>:<ip>`: Overrides the operating system DNS lookup. Instructs curl that when contacting `portal.campus.local` on port `443`, send packets directly to `$INGRESS_IP` while retaining the SNI and Host header. Bypasses the need to modify `/etc/hosts` or local DNS servers!
+
 ### Cleanup
 ```bash
 kubectl delete ingress campus-ingress-tls
 kubectl delete secret campus-tls-cert
 rm -f tls.key tls.crt
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete ingress/secret`: Removes the routing rules from the cluster and drops the SSL certificates.
+* `rm -f tls.key tls.crt`: Deletes the temporary local self-signed key files from the host filesystem.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Ingress Resource vs Ingress Controller:**
+  * **Ingress Resource:** A YAML declaration of routing rules (hosts, paths, services). It is passive and does nothing alone.
+  * **Ingress Controller:** The active proxy software (NGINX, Traefik, HAProxy, Envoy) that evaluates Ingress resources and actually forwards client traffic.
+* **IngressClass:** A cluster-level object specifying which Ingress Controller should implement a given Ingress resource (`spec.ingressClassName: nginx`).
+* **PathType:**
+  * `Exact`: Matches the URL path exactly, case-sensitively.
+  * `Prefix`: Matches URL path prefixes segmented by `/` (e.g. `/api` matches `/api`, `/api/v1`).
+  * `ImplementationSpecific`: Relies on controller-specific regular expressions.
+* **TLS Termination (SSL Offloading):** The practice of terminating HTTPS connections at the Ingress boundary, decrypting the traffic, and forwarding raw HTTP packets to internal cluster pods to reduce cryptographic overhead on application containers.
 

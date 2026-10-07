@@ -182,10 +182,17 @@ kubectl apply -f deployment/backend-deployment.yaml
 ```
 * Explanation: Deploys 3 replicas with label `app: yatri-backend` listening on container port 5000.
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `kubectl apply -f <path>`: Deploys the declarative Deployment manifest creating a ReplicaSet with 3 pods running the backend Python server.
+
 Verify pods are running:
 ```bash
 kubectl get pods -l app=yatri-backend -o wide
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get pods -l app=yatri-backend`: Filters the pod list to only include pods with label `app=yatri-backend`.
+- `-o wide`: Formats output to include extra columns: the assigned cluster **`IP`** address (`10.244.x.x`), the physical/virtual **`NODE`** hosting the pod, and container readiness.
 
 Expected output:
 ```text
@@ -208,10 +215,16 @@ kubectl apply -f service/clusterip.yaml
 ```
 * Explanation: Creates a virtual IP listening on port 80 and forwarding to targetPort 5000.
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- Creates a stable Kubernetes virtual IP (ClusterIP) that acts as an internal load balancer fronting the backend pods.
+
 Inspect the service:
 ```bash
 kubectl get svc yatri-backend-service
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get svc` (or `get services`): Queries Service objects. Displays `CLUSTER-IP` (immutable virtual IP), `PORT(S)` (`80/TCP`), and `EXTERNAL-IP` (`<none>` because ClusterIP is internal only).
 
 Expected output:
 ```text
@@ -223,6 +236,10 @@ Now inspect the associated Endpoints object:
 ```bash
 kubectl get endpoints yatri-backend-service
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get endpoints`: Inspects the dynamically created `Endpoints` resource matching the service name.
+- Verifies which live pod IPs and ports (`10.244.0.x:5000`) are actively registered to receive traffic.
 
 Expected output:
 ```text
@@ -250,6 +267,13 @@ Test DNS resolution from inside the cluster:
 kubectl exec -it curl-test-pod -- nslookup yatri-backend-service
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `exec`: Executes a command inside a running container.
+- `-i` (or `--stdin`): Keeps standard input open.
+- `-t` (or `--tty`): Allocates a pseudo-TTY terminal.
+- `--`: Separator flag telling `kubectl` that all subsequent arguments are the command and flags to execute *inside* the container, not options for `kubectl`.
+- `nslookup yatri-backend-service`: Queries the internal CoreDNS server (`10.96.0.10:53`) to resolve the short service hostname to its ClusterIP (`10.96.145.82`).
+
 Expected output:
 ```text
 Server:    10.96.0.10
@@ -263,6 +287,9 @@ Send an HTTP request using the service name (no IP addresses needed):
 ```bash
 kubectl exec -it curl-test-pod -- curl -s http://yatri-backend-service:80
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- Demonstrates **Service Discovery**. The client pod does not need to know any pod IP. It queries `http://yatri-backend-service:80`, and the Linux kernel distributes the connection to one of the backend pods via round-robin.
 
 Expected output:
 ```text
@@ -289,10 +316,16 @@ kubectl apply -f service/nodeport.yaml
 ```
 * Explanation: Opens port `30080` on every node and forwards to `port 80` -> `targetPort 5000`.
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `apply -f service/nodeport.yaml`: Creates a NodePort service. Kubernetes allocates a static port from the standard cluster-wide range (`30000–32767`) across every worker node.
+
 Inspect the NodePort service:
 ```bash
 kubectl get svc yatri-backend-nodeport
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `PORT(S) 80:30080/TCP`: Format is `<ServicePort>:<NodePort>/<Protocol>`. Port 80 is the virtual ClusterIP port inside the cluster; port 30080 is the high port open on all node physical/VM network interfaces.
 
 Expected output:
 ```text
@@ -304,6 +337,9 @@ Test access directly from your host terminal:
 ```bash
 curl http://localhost:30080
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- Reaches the backend service from outside the cluster by querying the node IP/localhost on port 30080 without needing `kubectl exec` or internal DNS.
 
 Expected output:
 ```text
@@ -319,10 +355,16 @@ Deploy the LoadBalancer service:
 kubectl apply -f service/loadbalancer.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `apply -f service/loadbalancer.yaml`: On supported cloud platforms (AWS, GCP, Azure), this manifest triggers the cloud provider's **Cloud Controller Manager (CCM)** to asynchronously provision a public cloud load balancer (e.g. AWS Network Load Balancer).
+
 Inspect the service:
 ```bash
 kubectl get svc yatri-backend-lb
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `EXTERNAL-IP`: Displays the public DNS name or IPv4 address assigned by the cloud provider. On local Minikube/kind without a cloud controller or `minikube tunnel`, this shows `<pending>`.
 
 Expected output (Local Minikube):
 ```text
@@ -351,6 +393,9 @@ Check the endpoints:
 kubectl get endpoints broken-backend-service
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get endpoints`: The definitive check when traffic to a service hangs or returns 503. If `ENDPOINTS` is `<none>`, the service has not attached to any healthy pods.
+
 Expected output:
 ```text
 NAME                     ENDPOINTS   AGE
@@ -361,6 +406,9 @@ Attempt to curl the broken service from the diagnostic pod:
 ```bash
 kubectl exec -it curl-test-pod -- curl --connect-timeout 3 http://broken-backend-service
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `--connect-timeout 3`: Times out after 3 seconds when connecting to a service with empty endpoints, preventing bash scripts from hanging indefinitely.
 
 Expected output:
 ```text
@@ -386,7 +434,20 @@ Cleanup broken service:
 kubectl delete -f troubleshooting/empty-endpoints.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `delete -f`: Safely terminates and removes the broken service manifest.
+
 ---
+
+### 📚 Tech Jargons Demystified:
+- **port vs targetPort vs nodePort**:
+  - `port`: The port exposed on the Service's internal virtual ClusterIP.
+  - `targetPort`: The port the actual container process is listening on inside the Pod (e.g. port 5000).
+  - `nodePort`: The high port (`30000–32767`) exposed externally across every worker node's physical/virtual network interface.
+- **FQDN (Fully Qualified Domain Name)**: Complete internal DNS name for a service formatted as `<service-name>.<namespace>.svc.cluster.local`.
+- **CoreDNS**: The in-cluster DNS server that watches the Kubernetes API for new Services and dynamically writes DNS A/SRV records.
+- **Kube-Proxy**: The network daemon running on every node that reflects Services in iptables or IPVS connection routing tables.
+
 
 ## 5-Minute Revision Checklist
 

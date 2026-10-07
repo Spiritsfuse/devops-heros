@@ -1,9 +1,9 @@
-# Session 13: Kubernetes Storage, HPA & Probes – Assignment
+# Session 13: Kubernetes Storage, HPA & Probes - Assignment
 
 ## Student Information
 - **Name:** Dhruv Sharma
 - **Enrollment Number (Roll No):** 24BCS10294
-- **Session:** Session 13 – Kubernetes Storage, Horizontal Pod Autoscaler (HPA) & Health Probes
+- **Session:** Session 13 - Kubernetes Storage, Horizontal Pod Autoscaler (HPA) & Health Probes
 - **Repository:** `devops-heros/session-13-storage-hpa-probes`
 
 ---
@@ -168,19 +168,13 @@ php-apache   Deployment/php-apache   0%/50%    1         10        1          12
 
 #### 1. HPA Initial Status & Target Reference
 ![HPA Initial Status](screenshots/01-hpa-initial-status.png)
-*(Placeholder: Run `kubectl get hpa,pods` right after deploying `hpa.yaml`)*
 
-#### 2. Load Generator Execution
-![Load Generator Running](screenshots/02-load-generator-running.png)
-*(Placeholder: Run `kubectl run -i --tty load-generator ...` producing synthetic traffic)*
+#### 2. Load Generator Execution & Traffic Stream
+![Load Generator Running](screenshots/02-load-generator-launch.png)
+![Load Generator Traffic Stream](screenshots/02-load-generator-traffic-stream.png)
 
-#### 3. CPU Utilization Spike & Replica Scaling (1 -> 7 Replicas)
+#### 3. Real-Time CPU Utilization Monitoring
 ![CPU Utilization & Scaling](screenshots/03-hpa-cpu-utilization-scaling.png)
-*(Placeholder: Run `kubectl get hpa -w` and `kubectl top pods` showing replicas scaling up)*
-
-#### 4. Automatic Scale-Down after Cooldown
-![HPA Scale Down](screenshots/04-hpa-scale-down.png)
-*(Placeholder: Run `kubectl get hpa` showing replicas reverting back to 1)*
 
 ---
 

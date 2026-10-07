@@ -150,6 +150,12 @@ Download and load it in another job:
   run: docker load < myapp.tar
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `docker build -t myapp:latest .`: Builds a Docker container image tagged `myapp:latest` using the `Dockerfile` in the current directory (`.`).
+- `docker save myapp:latest > myapp.tar`: Exports the container image layers into a standalone compressed tar archive (`myapp.tar`) on disk so it can be uploaded as an artifact.
+- `docker load < myapp.tar`: Re-imports the container image tarball back into the local Docker daemon engine on a different runner machine.
+- `pytest --junitxml=test-results/results.xml`: Generates a standard JUnit XML formatted test execution report for test result dashboards.
+
 ---
 
 ## 7. Artifact Retention
@@ -184,8 +190,17 @@ retention-days:    = how long GitHub stores the artifact
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **`actions/upload-artifact@v4`:** Action that compresses specified local paths into a zip archive and registers it under the current workflow run.
+- **`actions/download-artifact@v4`:** Action that retrieves previously uploaded artifacts in downstream dependent jobs.
+- **Artifact Ephemerality vs Retention:** Artifacts are retained for a configurable number of days (`retention-days:`) before being purged automatically to prevent runaway cloud storage consumption.
+- **Docker Image Portability via Tar:** Exporting images via `docker save` enables sharing image builds across runners without publishing intermediate untested images to an external registry.
+
+---
+
 ## Reference
 
 * **Storing workflow data as artifacts:** https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/storing-and-sharing-data-from-a-workflow
 * **actions/upload-artifact:** https://github.com/actions/upload-artifact
 * **actions/download-artifact:** https://github.com/actions/download-artifact
+

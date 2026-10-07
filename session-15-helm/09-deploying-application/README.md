@@ -130,6 +130,9 @@ spec:
 helm lint guestbook-chart
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm lint`: Runs static analysis and syntax validation on the chart to identify structural errors, formatting issues, or missing required chart metadata before deployment.
+
 Expected output:
 
 ```text
@@ -145,6 +148,10 @@ Expected output:
 helm template my-guestbook guestbook-chart
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm template`: Renders chart templates locally and prints the evaluated manifests to standard output without needing a cluster connection.
+- `my-guestbook`: Test release name to substitute into `{{ .Release.Name }}`.
+
 Check the output to ensure all `{{ }}` are replaced with real values.
 
 ---
@@ -154,6 +161,9 @@ Check the output to ensure all `{{ }}` are replaced with real values.
 ```bash
 helm install my-guestbook guestbook-chart
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `helm install`: Installs the chart as a new release named `my-guestbook` into the target Kubernetes cluster.
 
 Expected output:
 
@@ -174,6 +184,9 @@ kubectl get services
 kubectl get configmaps
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl get pods,services,configmaps`: Checks the status of the three distinct Kubernetes resources generated and deployed by the Helm chart.
+
 Expected pods output:
 
 ```text
@@ -188,6 +201,10 @@ my-guestbook-app-xxxx            1/1     Running   0
 ```bash
 helm upgrade my-guestbook guestbook-chart --set replicaCount=3
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `helm upgrade`: Updates release `my-guestbook`.
+- `--set replicaCount=3`: Overrides `replicaCount` to scale the deployment from 1 to 3 pods in place.
 
 ```bash
 kubectl get pods
@@ -210,6 +227,9 @@ my-guestbook-app-cccc            1/1     Running   0
 helm history my-guestbook
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm history my-guestbook`: Lists all revisions and descriptions for the release to verify the upgrade created Revision 2.
+
 Expected output:
 
 ```text
@@ -226,6 +246,9 @@ REVISION   STATUS      DESCRIPTION
 helm rollback my-guestbook 1
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm rollback my-guestbook 1`: Reverts the deployment back to Revision 1 (1 replica).
+
 Expected output:
 
 ```text
@@ -239,6 +262,9 @@ Rollback was a success! Happy Helming!
 ```bash
 helm uninstall my-guestbook
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `helm uninstall my-guestbook`: Completely purges the release and deletes the Deployment, Service, and ConfigMap simultaneously.
 
 All resources (Deployment, Service, ConfigMap) are deleted automatically.
 
@@ -260,6 +286,15 @@ All resources (Deployment, Service, ConfigMap) are deleted automatically.
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **Linting (`helm lint`):** Static verification that checks chart structure, required YAML keys, and template syntax against Helm best practices.
+- **NodePort Service:** A Kubernetes Service type that opens a high port (range 30000–32767) on all cluster nodes, providing direct external access without an external cloud load balancer.
+- **Template Pipeline (`| quote`):** A formatting filter that ensures string values with numbers or special characters are safely quoted in the final YAML output.
+- **Unified Lifecycle Management:** Helm treats the entire multi-manifest application (Deployment, Service, ConfigMap) as a single logical unit that can be installed, updated, rolled back, or deleted together.
+
+---
+
 ## Reference
 
 * **Helm best practices:** https://helm.sh/docs/chart_best_practices/
+

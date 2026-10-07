@@ -1,10 +1,7 @@
 # Session 17 Screenshots
 
-This directory stores execution and verification screenshots for the DevSecOps pipeline:
-- `01-devsecops-pipeline-overview.png` – GitHub Actions pipeline execution showing end-to-end stages.
-- `02-sast-codeql-results.png` – CodeQL Static Application Security Testing run output.
-- `03-sca-dependency-scan.png` – Software Composition Analysis (pip-audit / Trivy) scan output.
-- `04-secret-scanning-gitleaks.png` – Secret scanning detection run.
-- `05-trivy-container-scan.png` – Container image vulnerability scan (CVE audit).
-- `06-security-gate-status.png` – Security gate check enforcing failure on HIGH/CRITICAL CVEs.
-- `07-kubernetes-deployment.png` – Deployment applied to Kubernetes cluster.
+This directory stores execution and verification screenshots for the DevSecOps pipeline (Repository: https://github.com/Spiritsfuse/ci-cd-python-app-demo):
+- `01-devsecops-pipeline-overview.png`: GitHub Actions pipeline execution showing end-to-end stages (Unit Tests, SAST CodeQL, SCA, Docker Build, Trivy Image Scan, Push Image, Deploy to Kubernetes).
+- `02-sast-codeql-results.png`: CodeQL Static Application Security Testing run output.
+- `03-trivy-container-image-scan.png`: Trivy container image vulnerability scanning job execution.
+- `04-secret-scanning-dockerhub-token.png`: Actions secrets and credentials configuration (`DOCKERHUB_TOKEN`).

@@ -215,6 +215,23 @@ Then:
 terraform destroy
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform init`: Prepares working directory, configures backend, and installs required provider plugins (`.terraform/`).
+- `terraform fmt`: Rewrites `.tf` files into standard HCL canonical formatting and indentation.
+- `terraform validate`: Statically verifies internal syntax, configuration arguments, and variable types without making remote cloud calls.
+- `terraform plan`: Reads current state and remote resources, generating an execution plan predicting additions (`+`), changes (`~`), and removals (`-`).
+- `terraform apply`: Applies planned changes to the cloud provider, asking for interactive confirmation (`yes`).
+- `terraform state list`: Dumps all resource addresses recorded in the active state database.
+- `terraform destroy`: De-provisions all managed cloud infrastructure tracked in state.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Canonical Formatting (`fmt`):** A strict, automated code styling standard universally adopted by the Terraform ecosystem, eliminating stylistic arguments in team pull requests.
+- **Syntactic vs Semantic Validation:** Syntactic checks ensure your HCL has matching braces and quotes; semantic validation checks that referenced variables, providers, and attributes actually exist.
+- **Topological Sort:** The algorithm Terraform Core uses to order resource creation based on explicit and implicit dependencies (e.g. creating the VPC before creating the Subnet).
+- **Blast Radius:** The scope of cloud infrastructure impacted if a plan is applied or destroyed incorrectly. Minimizing blast radius is achieved through smaller, decoupled Terraform configurations.
+
 ---
 
 # Practice Questions
@@ -225,3 +242,4 @@ terraform destroy
 4. Which command shows changes without applying them?
 5. Which command actually creates resources?
 6. Which command removes resources?
+

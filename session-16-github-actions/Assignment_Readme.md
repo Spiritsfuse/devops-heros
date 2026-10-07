@@ -1,9 +1,9 @@
-# Session 16: CI/CD & GitHub Actions – Assignment
+# Session 16: CI/CD & GitHub Actions - Assignment
 
 ## Student Information
 - **Name:** Dhruv Sharma
 - **Enrollment Number (Roll No):** 24BCS10294
-- **Session:** Session 16 – Continuous Integration & Continuous Delivery (CI/CD) with GitHub Actions
+- **Session:** Session 16 - Continuous Integration & Continuous Delivery (CI/CD) with GitHub Actions
 - **Repository:** `devops-heros/session-16-github-actions`
 
 ---
@@ -140,19 +140,15 @@ graph TD
 
 ## Screenshots & Deliverables Verification Checklist
 
-### Screenshot Placeholders:
-1. **GitHub Actions Overview**:
+### Screenshots & Evidences:
+1. **GitHub Actions Workflow Runs Overview**:
    ![GitHub Actions Runs](screenshots/01-github-actions-workflow-runs.png)
-   *(Screenshot showing all jobs green in GitHub Actions UI)*
-2. **Unit Test Execution**:
-   ![CI Test Job Success](screenshots/02-ci-test-job-success.png)
-   *(Screenshot showing `pytest -v` output)*
-3. **Artifact Upload**:
-   ![Build Artifact Upload](screenshots/03-ci-build-artifacts.png)
-   *(Screenshot showing `calculator-build` artifact download link)*
-4. **CD Docker Packaging & Staging Deploy**:
-   ![CD Deployment](screenshots/04-cd-docker-build-deployment.png)
-   *(Screenshot showing Docker buildx and deployment verification)*
+
+2. **Actions Secrets Configuration (`DEMO_SECRET`)**:
+   ![GitHub Actions Secrets](screenshots/02-github-actions-secrets.png)
+
+3. **Jobs & Artifacts Build Execution Success**:
+   ![CI Jobs and Artifacts Success](screenshots/03-ci-jobs-and-artifacts-success.png)
 
 | Deliverable | Location | Status |
 | :--- | :--- | :---: |

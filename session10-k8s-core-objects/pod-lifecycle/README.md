@@ -34,35 +34,56 @@ Create:
 kubectl apply -f 01-running.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `apply -f`: Submits the pod manifest to the kube-apiserver, initiating container scheduling.
+
 Watch:
 ```bash
 kubectl get pods -w
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `-w` (or `--watch`): Streams pod lifecycle events in real time (`Pending` -> `ContainerCreating` -> `Running`).
 
 Detailed lifecycle:
 ```bash
 kubectl describe pod lifecycle-running
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `describe pod`: Audits conditions (`Initialized`, `Ready`, `ContainersReady`, `PodScheduled`), probe states, restart counts, and chronological cluster events.
+
 Logs:
 ```bash
 kubectl logs lifecycle-running
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `logs`: Queries stdout/stderr streams emitted by the container.
 
 Container state:
 ```bash
 kubectl get pod lifecycle-running -o jsonpath='{.status.containerStatuses[0].state}'
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `-o jsonpath='...'`: Uses JSONPath expression syntax to surgically extract the exact container state (`running`, `waiting`, or `terminated`) without scrolling through pages of YAML.
+
 Full YAML/status:
 ```bash
 kubectl get pod lifecycle-running -o yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `-o yaml`: Dumps the complete raw live object definition stored in etcd, including dynamic runtime status fields populated by the kubelet.
+
 Delete:
 ```bash
 kubectl delete pod lifecycle-running
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `delete pod`: Sends `SIGTERM` to the container and triggers the 30-second graceful termination countdown.
 
 ## Important note about STATUS
 
@@ -170,6 +191,11 @@ kubectl logs lifecycle-crashloop
 kubectl logs lifecycle-crashloop --previous
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `kubectl describe pod ...`: Shows exit codes (e.g. `Exit Code: 1`) and the restart count backoff timer.
+- `kubectl logs ...`: Prints logs from the *currently running* container instance.
+- `--previous`: Fetches standard output and standard error from the **previous container instance before it crashed**. Essential for diagnosing segfaults or panics where the new container has just rebooted and overwritten memory logs!
+
 ## 6. ImagePullBackOff
 
 ```bash
@@ -244,6 +270,9 @@ kubectl describe pod lifecycle-init
 kubectl logs lifecycle-init -c setup
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `-c setup`: In pods with multiple containers or init containers, specifies the exact container name (`setup`) to inspect. Without `-c`, Kubernetes returns an error requiring you to choose which container's logs to view.
+
 Teaching point:
 
 ```text
@@ -271,6 +300,9 @@ View individual container logs:
 kubectl logs lifecycle-multi-container -c app
 kubectl logs lifecycle-multi-container -c sidecar
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `-c app` / `-c sidecar`: Targets individual containers sharing the pod's network namespace and localhost interface.
 
 Teaching point:
 
@@ -338,3 +370,13 @@ kubectl get pod <pod>
 kubectl describe pod <pod>
 kubectl logs <pod>
 ```
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **CrashLoopBackOff**: A backoff algorithm where the kubelet restarts a crashing container with exponential delays (10s, 20s, 40s... up to 5 minutes) to avoid overloading node CPU and disk with crash loops.
+- **ImagePullBackOff**: Occurs when the container runtime fails to pull an image (due to wrong image tag, missing registry credentials, or network errors) and exponentially delays retry attempts.
+- **Pod Phase vs Container State**:
+  - *Pod Phase*: High-level status (`Pending`, `Running`, `Succeeded`, `Failed`, `Unknown`).
+  - *Container State*: Detailed process status inside the container (`Waiting`, `Running`, `Terminated`).
+- **Grace Period (SIGTERM vs SIGKILL)**: When a pod is deleted, Kubernetes sends `SIGTERM` and waits `terminationGracePeriodSeconds` (default 30s) for connections to drain. If the container doesn't terminate within the grace period, the kernel forcibly kills it with `SIGKILL` (signal 9).

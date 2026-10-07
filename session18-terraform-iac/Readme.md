@@ -90,10 +90,24 @@ Verify connection:
 aws sts get-caller-identity
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform -version`: Inspects installed Terraform core engine version, runtime platform architecture (`linux_amd64`), and detects if newer releases are available.
+- `aws configure`: Interactive setup script prompting for IAM Access Key ID, Secret Access Key, target AWS Region, and output format; saves credentials to `~/.aws/credentials` and configuration to `~/.aws/config`.
+- `aws sts get-caller-identity`: Calls the AWS Security Token Service (STS) to return the IAM UserId, AWS Account ID number, and ARN of the currently authenticated identity, verifying active network connectivity and credential validity.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Infrastructure as Code (IaC):** The practice of provisioning and managing computer data centers, networks, storage, and cloud infrastructure using machine-readable definition files rather than physical hardware configuration or interactive GUI clicks.
+- **HCL (HashiCorp Configuration Language):** The declarative, human-readable language used by Terraform to describe cloud resources and infrastructure blueprints.
+- **AWS STS (Security Token Service):** AWS web service providing temporary, limited-privilege credentials and identity inspection APIs (`get-caller-identity`).
+- **Idempotency:** A property where applying the same configuration multiple times results in the exact same infrastructure state without unnecessary duplication or unexpected errors.
+
 ---
 
 ## 5. Lecture References
 
 - [Install Terraform CLI - HashiCorp](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 - [Build Infrastructure with Terraform on AWS](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/aws-create)
-- [AWS CLI v2 Official Getting Started](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [AWS CLI v2 Official Getting Started](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+

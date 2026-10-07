@@ -55,6 +55,9 @@ Run:
 kubectl get storageclass
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get storageclass`: Queries the API server for registered dynamic volume provisioners. The output indicates the storage provider (`k8s.io/minikube-hostpath`, `ebs.csi.aws.com`), reclaim policy, and whether a class is marked as default with `(default)`.
+
 On Minikube, you may see something similar to:
 
 ```text
@@ -73,6 +76,9 @@ Run:
 ```bash
 kubectl describe storageclass standard
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe storageclass standard`: Examines configuration parameters including provisioner driver, mount options, expansion capability, and volume binding mode.
 
 This helps us understand:
 
@@ -107,6 +113,9 @@ Apply it:
 kubectl apply -f pvc.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pvc.yaml`: Creates the PVC referencing `storageClassName: standard`. Triggers the background CSI provisioner to allocate a dedicated storage volume and auto-generate a matching PV without human intervention.
+
 ---
 
 ## 6. Check PVC
@@ -116,6 +125,9 @@ Run:
 ```bash
 kubectl get pvc
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pvc`: Checks claim status. Notice that the volume name is dynamically assigned (e.g. `pvc-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).
 
 You should see something similar to:
 
@@ -135,6 +147,9 @@ Now run:
 ```bash
 kubectl get pv
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pv`: Lists the newly generated PersistentVolume created on-the-fly by the provisioner. Its capacity matches the claim's request (`500Mi` or rounded minimum allocation).
 
 You should see a PV that was dynamically created.
 
@@ -195,6 +210,9 @@ kubectl get pv
 kubectl describe pvc dynamic-pvc
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe pvc dynamic-pvc`: Shows dynamic provisioning events (e.g. `ProvisioningSucceeded: Successfully provisioned volume pvc-xxxx`).
+
 ---
 
 ## Key Learning
@@ -211,3 +229,11 @@ Remember:
 
 * **Storage Classes:**  
   https://kubernetes.io/docs/concepts/storage/storage-classes/
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Dynamic Provisioning:** The automated process where the cluster automatically creates physical or cloud storage assets when a developer submits a PVC, eliminating administrative ticket delays.
+* **StorageClass Provisioner:** The volume plugin (e.g., `ebs.csi.aws.com` for AWS EBS or `pd.csi.storage.gke.io` for GCP) responsible for calling cloud APIs to create, resize, and delete disks.
+* **allowVolumeExpansion:** A flag on StorageClasses (`allowVolumeExpansion: true`) enabling developers to increase PVC storage capacity online without recreating the volume or experiencing downtime.
+* **Default StorageClass Annotation:** A metadata annotation (`storageclass.kubernetes.io/is-default-class: "true"`) marking which class provisions storage when a PVC omits the `storageClassName` field.

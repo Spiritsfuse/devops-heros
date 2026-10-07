@@ -61,6 +61,9 @@ kubectl config current-context
 minikube addons enable ingress
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `minikube addons enable ingress`: Proactively downloads and deploys the official Kubernetes NGINX Ingress Controller pods, ClusterIP services, and default backend into the `ingress-nginx` namespace of your local Minikube VM.
+
 Wait for the Ingress Controller to become ready:
 ```bash
 kubectl wait --namespace ingress-nginx \
@@ -68,6 +71,13 @@ kubectl wait --namespace ingress-nginx \
   --selector=app.kubernetes.io/component=controller \
   --timeout=120s
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl wait`: Blocks execution until a specific status condition is met on target resources.
+* `--namespace ingress-nginx`: Directs the lookup to the Ingress controller's system namespace.
+* `--for=condition=ready pod`: Waits until the pod's `status.conditions[?(@.type=="Ready")].status` equals `True`.
+* `--selector=app.kubernetes.io/component=controller`: Scopes the wait strictly to the Nginx controller pod.
+* `--timeout=120s`: Aborts if the condition is not satisfied within 2 minutes.
 
 Expected output:
 ```text
@@ -83,6 +93,10 @@ Verify the stored values:
 ```bash
 kubectl describe configmap yatri-app-config
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `apply -f .../configmap.yaml`: Stores non-sensitive application settings (`ENVIRONMENT`, `LOG_LEVEL`, `DEFAULT_CURRENCY`, `MAX_BOOKING_DAYS`, `APP_PORT`) in etcd.
+* `describe configmap`: Displays all data keys and plaintext string values.
 
 Expected output:
 ```text
@@ -106,6 +120,10 @@ Verify (values are masked):
 kubectl describe secret yatri-db-secret
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `apply -f .../secret.yaml`: Stores base64-encoded database credentials securely in the cluster.
+* `describe secret`: Confirms keys exist while masking payload byte counts (`POSTGRES_DB: 22 bytes`) to safeguard passwords from over-the-shoulder snooping.
+
 Expected output:
 ```text
 Name:         yatri-db-secret
@@ -128,6 +146,10 @@ Check pods and service:
 kubectl get pods -l app=yatri-frontend
 kubectl get svc yatri-frontend-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `apply -f .../frontend.yaml`: Creates the Nginx deployment (replicas: 2) and an internal ClusterIP service listening on port 80.
+* `get pods -l app=yatri-frontend`: Checks that both frontend replica pods transition to `Running`.
 
 Expected:
 ```text
@@ -155,6 +177,9 @@ Wait until Running:
 kubectl rollout status deployment/yatri-backend --timeout=90s
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `rollout status deployment/yatri-backend`: Monitors the asynchronous deployment rollout, streaming status updates until all backend pods pass their readiness checks or the 90-second timeout expires.
+
 ### Step 6: Apply the Ingress
 ```bash
 kubectl apply -f 04-full-demo/ingress.yaml
@@ -164,6 +189,9 @@ Inspect routing rules:
 ```bash
 kubectl describe ingress yatri-ingress
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `describe ingress yatri-ingress`: Prints the live ingress route table, mapping hostname `yatri.local` with path `/api(/|$)(.*)` pointing to `yatri-backend-service:80` and `/` pointing to `yatri-frontend-service:80`.
 
 Expected output (key section):
 ```text
@@ -184,6 +212,10 @@ Rules:
 ```bash
 echo "$(minikube ip)  yatri.local" | sudo tee -a /etc/hosts
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `echo "$(minikube ip) yatri.local"`: Substituted string combining Minikube's bridge IP address with our custom local virtual domain.
+* `| sudo tee -a /etc/hosts`: Uses administrative privilege (`sudo`) to append (`-a`) the DNS mapping line into the system host resolver file `/etc/hosts`.
 
 Verify:
 ```bash
@@ -206,6 +238,9 @@ Or via curl:
 curl http://yatri.local
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `curl http://yatri.local`: Dispatches an HTTP GET to the Ingress controller. The controller matches rule host `yatri.local` and path `/`, reverse-proxying the packet directly to the `yatri-frontend-service` endpoints.
+
 Expected output (NGINX default HTML page served through Ingress):
 ```html
 <!DOCTYPE html>
@@ -221,6 +256,9 @@ Expected output (NGINX default HTML page served through Ingress):
 ```bash
 curl http://yatri.local/api/
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `curl http://yatri.local/api/`: Reaches the backend Python server. Demonstrates that regex path routing works and the application successfully loaded both environment config and secrets.
 
 Expected output:
 ```text
@@ -240,6 +278,11 @@ The backend pod printed real values pulled from the ConfigMap (`ENVIRONMENT`, `L
 kubectl exec -it deploy/yatri-backend -- env | grep -E "ENVIRONMENT|LOG_LEVEL|POSTGRES"
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl exec -it deploy/yatri-backend`: Directly targets the Deployment resource (kubectl automatically picks one active replica pod).
+* `-- env`: Executes the Linux `env` command inside the container to print all running environment variables.
+* `| grep -E "..."`: Filters stdout using extended regex to inspect only our target configuration keys.
+
 Expected output:
 ```text
 ENVIRONMENT=production
@@ -254,6 +297,10 @@ POSTGRES_DB=yatri_production_db
 kubectl get secret yatri-db-secret \
   -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 --decode
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get secret -o jsonpath`: Pulls the base64 string from etcd.
+* `| base64 --decode`: Decodes the hashed string back to plaintext, demonstrating the difference between encoding and encryption.
 
 Output:
 ```text
@@ -271,11 +318,8 @@ Instead of the 7 manual steps above, run:
 bash 04-full-demo/run-demo.sh
 ```
 
-This automatically:
-1. Enables the Minikube Ingress addon.
-2. Applies ConfigMap, Secret, Frontend, Backend, and Ingress.
-3. Waits for all pods to be Ready.
-4. Patches `/etc/hosts` with `yatri.local`.
+#### 💡 Command Breakdown (cmd-explained):
+* `bash 04-full-demo/run-demo.sh`: Executes the automated orchestration shell script that sequentially handles addon verification, resource provisioning, wait loops, and local hosts file patching.
 
 ---
 
@@ -293,6 +337,9 @@ kubectl delete -f 04-full-demo/secret.yaml
 kubectl delete -f 04-full-demo/configmap.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete -f`: Destroys resources in reverse topological dependency order (Ingress first, then workloads, then configs/secrets).
+
 ---
 
 ## Key Interview Points
@@ -308,3 +355,13 @@ kubectl delete -f 04-full-demo/configmap.yaml
 
 * **What happens if a ConfigMap referenced in `envFrom` does not exist?**
   The pod will fail to start and will enter `CreateContainerConfigError` status.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Microservices Ingress Routing:** Using a single Layer 7 reverse proxy to dispatch requests across heterogeneous polyglot backends (e.g. Python API, React/Nginx static frontend) based on URI paths (`/`, `/api`) or virtual hosts.
+* **CreateContainerConfigError:** A pod scheduling error occurring when a container spec references a ConfigMap or Secret that does not exist in the namespace or contains a missing key.
+* **Readiness vs Liveness Probes:**
+  * **Readiness Probe:** Determines if the pod is ready to accept user traffic. When failing, the pod's IP is removed from Service Endpoints.
+  * **Liveness Probe:** Determines if the container is deadlocked or crashed. When failing, kubelet restarts the container.
+* **Rewrite-Target Annotation:** An Nginx Ingress feature (`nginx.ingress.kubernetes.io/rewrite-target`) that modifies the incoming URI before forwarding it to the upstream service, keeping internal service code cleanly decoupled from external public routing paths.

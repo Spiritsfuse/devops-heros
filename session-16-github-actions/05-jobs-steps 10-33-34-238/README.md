@@ -169,6 +169,11 @@ deploy
 
 The `|` character allows multiple shell lines.
 
+#### 💡 Command Breakdown (cmd-explained):
+- `run: |`: The YAML pipe symbol denotes a multi-line literal block scalar, allowing clean multi-line shell scripting without clumsy `&&` operators.
+- `pip install -r requirements.txt`: Reads dependency names and pins from the file and fetches wheels from PyPI.
+- `pytest --verbose`: Executes unit tests outputting full test names and statuses.
+
 ---
 
 ## 8. Conditional Steps
@@ -210,7 +215,16 @@ with:   = parameters passed to uses: actions
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **`uses:` Keyword:** Instantiates a reusable action published to GitHub Marketplace or another Git repository (e.g. `actions/checkout@v4`, `actions/setup-python@v5`).
+- **`with:` Block:** An input parameter dictionary passed into a reusable action.
+- **Conditional Execution (`if:`):** An expression evaluated prior to running a step; if false, the step is skipped without failing the job.
+- **Dependency Caching (`cache: 'pip'`):** Retains downloaded package tarballs across workflow runs to avoid re-downloading dependencies on every commit, saving bandwidth and build time.
+
+---
+
 ## Reference
 
 * **Jobs reference:** https://docs.github.com/en/actions/using-jobs/using-jobs-in-a-workflow
 * **Steps reference:** https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsteps
+

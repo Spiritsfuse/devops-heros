@@ -64,6 +64,15 @@ kubectl apply -f 04-recreate/deployment-v1.yaml
 kubectl apply -f 04-recreate/service.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `apply -f`: Declaratively configures the deployment and service.
+- Strategy configured in YAML:
+  ```yaml
+  strategy:
+    type: Recreate
+  ```
+- Kubernetes creates a ReplicaSet with 3 pods running version 1.
+
 Output:
 ```text
 deployment.apps/app-recreate created
@@ -74,6 +83,9 @@ Verify pods are running:
 ```bash
 kubectl get pods -l app=app-recreate
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get pods -l app=app-recreate`: Lists all pods managed by the recreate deployment selector.
 
 Output:
 ```text
@@ -87,6 +99,9 @@ Test access via NodePort 30040:
 ```bash
 curl http://localhost:30040
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- Performs a direct HTTP request to port 30040 mapped from the NodePort service.
 
 Output:
 ```html
@@ -107,6 +122,9 @@ Open two terminal windows side-by-side to watch the downtime behavior:
 ```bash
 kubectl get pods -l app=app-recreate -w
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `-w` (or `--watch`): Streams the pod lifecycle state changes. Under the Recreate strategy, you will witness all v1 pods transition to `Terminating` simultaneously BEFORE any v2 pod enters `Pending` or `ContainerCreating`.
 
 #### Terminal 2: Apply the v2 deployment
 ```bash
@@ -144,6 +162,12 @@ If you run a curl loop during the transition:
 ```bash
 while true; do curl -s --connect-timeout 1 http://localhost:30040 | grep -o 'VERSION: [^<]*' || echo "[OUTAGE] Connection failed"; sleep 0.5; done
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `--connect-timeout 1`: Instructs `curl` to give up waiting if TCP connection establishment takes longer than 1 second.
+- `|| echo "[OUTAGE] Connection failed"`: Shell fallback logical OR (`||`). When `curl` fails with a non-zero exit code (because no pods are running and the NodePort drops packets), it prints `[OUTAGE] Connection failed`.
+- `sleep 0.5`: Polls every half second.
+- **Theory Connection**: Empirically proves the exact duration of downtime in seconds when old pods are dead and new pods are starting.
 
 Output:
 ```text
@@ -184,6 +208,9 @@ If v2 has an issue and you must revert to v1:
 kubectl rollout undo deployment/app-recreate
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `rollout undo`: Initiates a rollback. Under the Recreate strategy, it will terminate all v2 pods before spinning v1 back up.
+
 Output:
 ```text
 deployment.apps/app-recreate rolled back
@@ -193,6 +220,9 @@ Check rollout status:
 ```bash
 kubectl rollout status deployment/app-recreate
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- Monitors the rollback until the desired pods are fully running.
 
 Output:
 ```text
@@ -217,3 +247,13 @@ deployment "app-recreate" successfully rolled out
 kubectl delete -f 04-recreate/service.yaml
 kubectl delete -f 04-recreate/deployment-v2.yaml
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `delete -f`: Tears down the service and v2 deployment, releasing cluster ports and memory.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Recreate Strategy**: A deployment strategy where all existing pods are killed simultaneously before any new pods are created.
+- **RWO (ReadWriteOnce) Volume Lock**: A storage limitation where a volume can only be mounted by a single node at a time. Rolling updates fail with RWO volumes because the new pod cannot mount the disk while the old pod still has it locked; Recreate frees the lock first.
+- **Breaking Schema Migration**: When a database change drops or renames columns such that running old and new application code simultaneously leads to fatal errors.

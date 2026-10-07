@@ -140,20 +140,33 @@ spec:
 kubectl apply -f 03-loadbalancer/app-deployment.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f`: Submits the declarative Deployment manifest creating 3 Nginx pods distributed across cluster worker nodes.
+
 Verify pods are running:
 ```bash
 kubectl get pods -l app=web-loadbalancer
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get pods`: Queries pods.
+* `-l app=web-loadbalancer`: Filters pods by the matching label selector to verify all 3 replicas show `Running` with `1/1` containers ready.
 
 ### Step 2: Apply the LoadBalancer Service
 ```bash
 kubectl apply -f 03-loadbalancer/service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `apply -f 03-loadbalancer/service.yaml`: Creates the Service resource with `type: LoadBalancer`. Signals the Cloud Controller Manager to provision an external cloud load balancer.
+
 Inspect service creation:
 ```bash
 kubectl get svc web-service-loadbalancer
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get svc web-service-loadbalancer`: Checks the status of the service, specifically monitoring whether the `EXTERNAL-IP` field transitions from `<pending>` to an assigned IP/DNS hostname.
 
 ---
 
@@ -171,6 +184,9 @@ Test access:
 curl http://a1b2c3d4e5f6-123456789.us-east-1.elb.amazonaws.com
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `curl http://<AWS-ELB-DNS>`: Makes an HTTP request to the publicly routable AWS Elastic Load Balancer DNS. The cloud load balancer receives the request on port 80 and forwards it to port 31250 on one of the healthy EC2 worker nodes.
+
 ### In Local Development (Minikube / Docker Desktop):
 On local Minikube, there is no real cloud provider. `EXTERNAL-IP` will stay in `<pending>` state unless you run the Minikube tunnel daemon.
 
@@ -178,6 +194,10 @@ On local Minikube, there is no real cloud provider. `EXTERNAL-IP` will stay in `
 ```bash
 minikube tunnel
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `minikube tunnel`: Runs as a background networking route daemon. It creates a network route on your host operating system directly into Minikube's CIDR gateway, allowing Kubernetes to bind external IPs (like `127.0.0.1` or `10.96.x.x`) on your host machine for services of `type: LoadBalancer`. Requires administrative/sudo privileges.
+
 Once the tunnel starts, `kubectl get svc web-service-loadbalancer` will show a real local IP (e.g., `127.0.0.1` or `10.96.88.20`).
 Open in browser:
 ```text
@@ -188,6 +208,9 @@ http://localhost
 ```bash
 minikube service web-service-loadbalancer
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `minikube service <svc>`: Opens an interactive terminal tunnel and launches your local browser pointing directly to the exposed service port without needing `minikube tunnel`.
 
 ---
 
@@ -203,3 +226,16 @@ minikube service web-service-loadbalancer
 kubectl delete -f 03-loadbalancer/service.yaml
 kubectl delete -f 03-loadbalancer/app-deployment.yaml
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete -f`: Destroys the Service and Deployment. If running on AWS/GCP, deleting the Service object commands the cloud controller manager to deprovision and delete the cloud load balancer to prevent unwanted cloud charges.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Cloud Controller Manager (CCM):** The Kubernetes control plane daemon that embeds cloud-specific control loops (AWS, Azure, GCP). When a `LoadBalancer` service is applied, CCM calls the cloud API (e.g., AWS Elastic Load Balancing API) to provision external physical/virtual infrastructure.
+* **EXTERNAL-IP `<pending>`:** Indicates Kubernetes has requested a load balancer from the cloud provider, but the cloud API has not yet assigned a public IP or DNS record (or in Minikube, no tunnel daemon is running).
+* **Layer 4 vs Layer 7 Load Balancing:**
+  * **L4 (LoadBalancer Service):** Routes packets based on IP address and TCP/UDP port without reading HTTP headers or URL paths. Fast and protocol-agnostic.
+  * **L7 (Ingress):** Application-aware routing inspecting HTTP hosts, URI paths (`/api`), and SSL/TLS certificates.
+* **Network Load Balancer (NLB):** High-throughput, ultra-low latency Layer 4 load balancer capable of handling millions of requests per second.

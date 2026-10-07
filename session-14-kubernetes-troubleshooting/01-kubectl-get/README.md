@@ -18,6 +18,9 @@ Run:
 kubectl apply -f pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pod.yaml`: Submits the pod manifest to the active namespace, creating the `get-demo` pod object in etcd.
+
 Expected output:
 
 ```text
@@ -33,6 +36,9 @@ Run:
 ```bash
 kubectl get pods
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pods`: Queries API server for a tabulated list of Pods in the active namespace. Shows container readiness (`1/1`), lifecycle status (`Running`), crash restart counts (`0`), and age.
 
 Expected output:
 
@@ -60,6 +66,9 @@ Run:
 ```bash
 kubectl get pods -o wide
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pods -o wide`: Formats output with expanded diagnostic columns: Pod IP address (`10.244.0.5`), host worker node name (`minikube`), designated nomination nodes, and readiness gate checks.
 
 You will see additional information such as:
 
@@ -105,6 +114,12 @@ kubectl get nodes
 kubectl get all
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get services`: Lists cluster service virtual IPs, types (ClusterIP, NodePort, LoadBalancer), and external port bindings.
+* `kubectl get deployments`: Shows desired, current, up-to-date, and available replica counts.
+* `kubectl get nodes`: Lists cluster worker and control plane physical/VM nodes and their health readiness.
+* `kubectl get all`: Composite query combining pods, services, daemonsets, deployments, replicasets, and statefulsets in the current namespace.
+
 ---
 
 ## 6. Watch Changes
@@ -115,11 +130,17 @@ Run:
 kubectl get pods -w
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pods -w`: The `-w` (`--watch`) flag opens a persistent streaming connection to the API server event channel, printing line-by-line updates in real time whenever any pod changes phase or container state.
+
 Now delete the Pod from another terminal:
 
 ```bash
 kubectl delete pod get-demo
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete pod get-demo`: Sends a SIGTERM termination signal to the container, waits for grace period (default 30s), then purges the object from etcd.
 
 You can watch the Pod disappear in real time.
 
@@ -191,3 +212,13 @@ It gives us the current state of Kubernetes resources.
 
 * **Kubernetes Command Line Tool (kubectl):**  
   https://kubernetes.io/docs/reference/kubectl/
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Output Formatting Flags (`-o`):**
+  * `-o wide`: Additional columns (IP, Node, OS image).
+  * `-o yaml` / `-o json`: Prints full, live Kubernetes API specification including runtime status and annotations.
+  * `-o jsonpath='{...}'`: Filters specific nested JSON values using expression syntax.
+* **READY Fraction (`0/1` vs `1/1`):** Indicates $\text{Ready Containers} / \text{Total Containers}$. A pod with `0/1` and status `Running` is running its process, but failing its `readinessProbe`.
+* **Streaming Watch (`-w`):** Instead of polling the API server in a loop, `-w` leverages HTTP chunked transfer / server-sent events to react instantaneously to state transitions.

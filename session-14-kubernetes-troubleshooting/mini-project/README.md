@@ -50,6 +50,10 @@ kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f deployment.yaml`: Provisions the target Nginx deployment with desired replicas and resource constraints.
+* `kubectl apply -f service.yaml`: Configures the routing layer with matching label selectors.
+
 Check:
 
 ```bash
@@ -67,17 +71,26 @@ Run:
 kubectl get pods -o wide
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pods -o wide`: Validates that pods have successfully acquired internal cluster IP addresses and are bound to active nodes.
+
 Then:
 
 ```bash
 kubectl describe pod <pod-name>
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe pod <name>`: Checks container state, readiness conditions, and recent scheduling events.
+
 Then:
 
 ```bash
 kubectl logs <pod-name>
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl logs <name>`: Inspects application standard output for startup errors or worker thread initialization logs.
 
 Then:
 
@@ -90,6 +103,9 @@ Inside the container:
 ```bash
 curl localhost
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `curl localhost`: Directly verifies application responsiveness from inside the container's network namespace, isolating application health from Kubernetes service routing.
 
 You should get the Nginx response.
 
@@ -109,6 +125,9 @@ Then:
 kubectl describe service troubleshooting-service
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe service troubleshooting-service`: Cross-references service parameters: `Selector`, `Port`, `TargetPort`, and active `Endpoints`.
+
 Check:
 * **Selector**
 * **TargetPort**
@@ -123,6 +142,9 @@ Run:
 ```bash
 kubectl get endpoints troubleshooting-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get endpoints troubleshooting-service`: Ensures the service controller has discovered and bound the backend pod IP addresses.
 
 You should see Pod IP addresses.
 
@@ -141,6 +163,9 @@ Check:
 ```bash
 kubectl get pod project-broken-pod
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pod project-broken-pod`: Monitors the failure cycle (`ErrImagePull` -> `ImagePullBackOff`).
 
 You should see an image-related problem.
 
@@ -161,6 +186,9 @@ Then:
 ```bash
 kubectl describe pod project-broken-pod
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe pod project-broken-pod`: Inspects the `Events` log to extract the exact registry error code and missing image name/tag.
 
 Then look at **Events**. Find the root cause.
 
@@ -217,6 +245,9 @@ Then:
 kubectl get endpoints troubleshooting-service
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get endpoints troubleshooting-service`: Confirms `ENDPOINTS: <none>` because no pod in the cluster carries label `app=wrong-app`.
+
 You should find: `<none>`.
 
 ---
@@ -229,6 +260,9 @@ Run:
 kubectl get pods --show-labels
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pods --show-labels`: Reveals actual labels attached to live pods (`app=troubleshooting-app`).
+
 Check the Pod label.
 
 Then:
@@ -236,6 +270,9 @@ Then:
 ```bash
 kubectl describe service troubleshooting-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe service troubleshooting-service`: Reveals the mismatched selector (`app=wrong-app`). Fixing the selector restores the endpoints list.
 
 Compare **Pod label** with **Service selector**. Find the mismatch and fix it.
 
@@ -262,6 +299,9 @@ kubectl describe service <service-name>
 kubectl get endpoints <service-name>
 nslookup <service-name>
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* The 8-command diagnostic battery systematically isolates failures across: Pod Phase (`get`), Object Spec & Events (`describe`), Application Runtime (`logs`), Container Filesystem/Local Loopback (`exec`), Cluster Timeline (`events`), Service Routing (`describe svc`), Endpoint Registration (`get ep`), and Internal Name Resolution (`nslookup`).
 
 ---
 
@@ -371,3 +411,12 @@ VERIFY
 ```
 
 That is the basic Kubernetes troubleshooting mindset.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Triage Mindset:** The structured, evidence-based methodology of observing symptoms first (`get`), gathering context (`describe`, `logs`), formulating hypotheses, testing inside the container (`exec`), and applying targeted fixes.
+* **Control Plane vs Data Plane Failures:**
+  * **Control Plane Failure:** Kube-apiserver, scheduler, or controller failure preventing scheduling or deployments (pods show `Pending`, API errors).
+  * **Data Plane Failure:** Worker node, CNI network, or container process failures (pods show `CrashLoopBackOff`, packets dropped).
+* **Root Cause Analysis (RCA):** The systematic identification of the fundamental underlying cause of a failure (e.g. wrong image tag or missing secret) rather than just treating superficial symptoms (e.g. continuously restarting pods).

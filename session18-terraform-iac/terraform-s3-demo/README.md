@@ -184,6 +184,11 @@ Or:
 aws s3api head-bucket --bucket demo
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `aws s3 ls`: High-level AWS CLI command that lists all S3 buckets in your AWS account or objects inside a specified bucket.
+- `aws s3api head-bucket --bucket <name>`: Direct REST API call verifying that the bucket exists and that the currently authenticated caller has permissions to access it. Returns HTTP 200 on success.
+- `terraform state show aws_s3_bucket.demo`: Inspects the precise state database attributes for the bucket managed by Terraform.
+
 ### 9. Destroy
 
 After completing the demo:
@@ -254,3 +259,12 @@ terraform destroy
                   v
           terraform destroy
 ```
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Head Bucket API:** Low-level AWS S3 API operation determining bucket presence and access authorization without downloading object catalogs.
+- **Root Module File Separation:** Structuring code into dedicated `.tf` files (`main.tf` for resources, `variables.tf` for inputs, `outputs.tf` for outputs, `providers.tf` for API plugins) adhering to production HashiCorp standards.
+- **State Reconciliation:** The process whereby Terraform compares live AWS infrastructure reality with the local state file and desired code to synchronize changes.
+- **Teardown Lifecycle:** Safely de-provisioning temporary testing infrastructure to guarantee zero cloud expense accumulation.
+

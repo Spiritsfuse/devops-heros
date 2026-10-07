@@ -163,6 +163,9 @@ spec:
 helm lint notes-chart
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm lint`: Runs syntactic analysis on `notes-chart` to guarantee templates render without YAML or schema violations before hitting any cluster.
+
 Expected output:
 
 ```text
@@ -178,6 +181,9 @@ Expected output:
 helm template notes-dev notes-chart
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm template notes-dev notes-chart`: Evaluates variables and generates rendered Kubernetes manifests in standard output using `notes-dev` as `.Release.Name`.
+
 Check that all `{{ }}` are replaced properly.
 
 ---
@@ -187,6 +193,9 @@ Check that all `{{ }}` are replaced properly.
 ```bash
 helm install notes-dev notes-chart
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `helm install`: Deploys the package to the cluster with the release identifier `notes-dev`.
 
 Expected output:
 
@@ -204,6 +213,9 @@ kubectl get services
 kubectl get configmaps
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl get pods,services,configmaps`: Confirms the creation of pods, nodeport service endpoint, and app configuration keys.
+
 Expected pods:
 
 ```text
@@ -218,6 +230,10 @@ notes-dev-deploy-xxxx           1/1     Running   0
 ```bash
 helm upgrade notes-dev notes-chart -f notes-chart/values-prod.yaml
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `helm upgrade`: Updates release `notes-dev`.
+- `-f notes-chart/values-prod.yaml`: Overrides default `values.yaml` with production configurations (scaling replicas to 3 and setting `ENVIRONMENT=production`).
 
 Expected output:
 
@@ -250,6 +266,9 @@ notes-dev-deploy-cccc           1/1     Running   0
 helm history notes-dev
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm history notes-dev`: Audits the release revisions to confirm Revision 1 was superseded and Revision 2 is currently deployed.
+
 Expected output:
 
 ```text
@@ -265,6 +284,9 @@ REVISION   STATUS      DESCRIPTION
 ```bash
 helm upgrade notes-dev notes-chart --set image.tag=broken-tag-does-not-exist
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `--set image.tag=broken-tag-does-not-exist`: Temporarily overrides the Docker image tag to a nonexistent value to simulate human deployment error.
 
 Check pods:
 
@@ -286,6 +308,9 @@ notes-dev-deploy-xxxx           0/1     ImagePullBackOff   0
 ```bash
 helm rollback notes-dev 2
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `helm rollback notes-dev 2`: Restores release `notes-dev` to Revision 2, immediately swapping out bad pods for healthy production replicas.
 
 Expected output:
 
@@ -316,6 +341,9 @@ kubectl get pods
 kubectl get services
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm uninstall notes-dev`: Deletes all Kubernetes resources tracked by this release in a single atomic teardown.
+
 All resources are gone.
 
 ---
@@ -334,7 +362,16 @@ All resources are gone.
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **Environment Parity:** Using identical Helm templates across dev, staging, and production while altering only environment-specific files (`values-prod.yaml`), eliminating configuration drift.
+- **Deep Merge:** Helm's process of layering values files where keys in specific override files (`-f`) supersede keys in base files (`values.yaml`), while maintaining unchanged keys.
+- **ImagePullBackOff:** A container runtime failure state occurring when the image cannot be pulled from the remote registry (due to bad tag, missing credentials, or invalid repository name).
+- **Zero-Downtime Rollback:** Restoring the previous working application state seamlessly via Kubernetes rolling update mechanics without terminating existing live traffic.
+
+---
+
 ## Reference
 
 * **Helm best practices:** https://helm.sh/docs/chart_best_practices/
 * **Helm CLI reference:** https://helm.sh/docs/helm/
+

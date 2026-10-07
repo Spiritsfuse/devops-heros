@@ -161,6 +161,10 @@ jobs:
       - run: pytest
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `strategy.matrix`: Instructs GitHub Actions to spawn 3 independent parallel runner jobs, substituting each listed Python version (`3.9`, `3.10`, `3.11`) into `${{ matrix.python-version }}`.
+- `run: pytest`: Executes the test suite on each respective runner environment concurrently.
+
 This creates three parallel jobs, one for each Python version.
 
 ---
@@ -176,7 +180,16 @@ matrix:              = run the same job across multiple configurations
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **Runner Label (`runs-on:`):** A selector routing jobs to appropriate runner pools (e.g. `ubuntu-latest`, `windows-latest`, `macos-latest`, or custom self-hosted labels).
+- **Matrix Strategy:** Multiplying a job definition across axes of versions or OS targets without duplicating YAML code blocks.
+- **Runner Isolation:** GitHub-hosted runners run in fresh hypervisor-isolated microVMs with dedicated storage that is destroyed post-job, preventing security cross-talk.
+- **Self-Hosted Runner Agent:** A lightweight daemon program running on a private server polling GitHub over HTTPS for new job payloads to execute locally.
+
+---
+
 ## Reference
 
 * **GitHub-hosted runners:** https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
 * **Self-hosted runners:** https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/about-self-hosted-runners
+

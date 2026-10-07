@@ -83,6 +83,11 @@ pip install -r requirements-dev.txt
 python3 -m pytest --cov=app --cov-report=term-missing
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `python3 -m pytest`: Runs pytest through the Python interpreter.
+- `--cov=app`: Measures test coverage across all python files in the `app/` package.
+- `--cov-report=term-missing`: Prints precise line numbers of any statements in `app/` that were not touched by tests.
+
 **Expected output:**
 ```
 tests/test_app.py::test_home                      PASSED
@@ -115,6 +120,11 @@ curl -X POST http://localhost:5001/api/calculate \
   -H "Content-Type: application/json" \
   -d '{"a": 6, "b": 3, "operation": "multiply"}'
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `curl -X POST`: Dispatches an HTTP POST request to the API server endpoint.
+- `-H "Content-Type: application/json"`: Informs Flask that the request payload body is formatted as JSON.
+- `-d '{"number1": 10, "number2": 20}'`: Passes the JSON data payload payload directly.
 
 ---
 
@@ -156,6 +166,15 @@ docker rmi hey-cicd:latest
 # Run in background (detached mode)
 docker run -d -p 5001:5001 hey-cicd:latest
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `docker build -t hey-cicd:latest .`: Assembles the Docker image layers specified in `Dockerfile` and tags it (`-t`) with the name `hey-cicd:latest`.
+- `docker run -p 5001:5001`: Starts a container, binding host port 5001 to container port 5001 (`-p <host_port>:<container_port>`).
+- `-d` (or `--detach`): Runs the container in the background as a daemon process, releasing your terminal immediately.
+- `docker ps`: Lists running containers with their container ID, image, command, ports, and names.
+- `docker stop <id>`: Sends `SIGTERM` followed by `SIGKILL` to safely stop a running container.
+- `docker rmi <image>`: Removes an image from the local Docker image cache.
+
 
 ---
 
@@ -276,6 +295,11 @@ kubectl delete -f k8s/deployment.yaml
 kubectl delete -f k8s/service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl get pods`: Queries the cluster API for current pod lifecycle status (`Running`, `ContainerCreating`, `CrashLoopBackOff`).
+- `kubectl logs <pod-name>`: Fetches and displays standard output and standard error logs from the primary container in `<pod-name>`.
+- `kubectl delete -f <file>`: Tears down all objects defined in `<file>`, performing graceful pod termination and resource cleanup.
+
 ---
 
 ## 🧪 DevSecOps Concepts Covered
@@ -290,6 +314,14 @@ kubectl delete -f k8s/service.yaml
 | **Container Registry** | GitHub Container Registry (GHCR) | Pipeline Step 6 |
 | **Orchestration** | Kubernetes | `k8s/` folder |
 | **CI/CD Automation** | GitHub Actions | `.github/workflows/devsecops.yml` |
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Zero-Trust CI/CD:** Ensuring that every code commit, third-party library, container image, and cluster deployment is cryptographically verified and scanned before admission.
+- **Vulnerability Remediation Cycle:** The full lifecycle from automated CVE discovery (via Trivy/pip-audit/CodeQL) to developer notification, branch fix, automated gate pass, and deployment.
+- **Air-Gapped Deployment:** Deploying software to isolated environments disconnected from the internet, relying on verified private container registries like GHCR.
+- **NodePort Exposure:** Binding an application service to an open port across all physical/virtual Kubernetes nodes (`30000–32767`) for simple direct network routing.
 
 ---
 

@@ -69,6 +69,10 @@ mini-project/
 ```bash
 kubectl apply -f namespace.yaml
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f namespace.yaml`: Provisions an isolated virtual cluster boundary (`production-webapp`), preventing resource name collisions with workloads in `default`.
+
 Output:
 ```text
 namespace/production-webapp created
@@ -79,6 +83,11 @@ namespace/production-webapp created
 kubectl apply -f pvc.yaml
 kubectl get pvc -n production-webapp
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f pvc.yaml`: Submits the 500Mi RWO storage claim. Triggers dynamic provisioning via the cluster's default StorageClass.
+* `kubectl get pvc -n production-webapp`: Verifies storage allocation within the target namespace.
+
 Expected output:
 ```text
 NAME       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
@@ -91,6 +100,12 @@ kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
 kubectl get pods -n production-webapp
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f deployment.yaml`: Creates the 2-replica deployment configuring startup, readiness, and liveness probes alongside storage volume mounts and CPU requests (`100m`).
+* `kubectl apply -f service.yaml`: Exposes the pods internally via ClusterIP on port 80.
+* `kubectl get pods -n production-webapp`: Checks that both pods report `READY 1/1` and status `Running` once readiness probes succeed.
+
 Expected output:
 ```text
 NAME                       READY   STATUS    RESTARTS   AGE
@@ -103,6 +118,11 @@ web-app-7988df964b-fghij   1/1     Running   0          25s
 kubectl apply -f hpa.yaml
 kubectl get hpa -n production-webapp
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f hpa.yaml`: Deploys the autoscaler configured to maintain 50% CPU utilization across minimum 2 and maximum 5 replicas.
+* `kubectl get hpa -n production-webapp`: Verifies HPA targeting and current metric readings.
+
 Expected output:
 ```text
 NAME          REFERENCE            TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
@@ -120,10 +140,15 @@ POD_NAME=$(kubectl get pods -n production-webapp -l app=web-app -o jsonpath='{.i
 kubectl exec -n production-webapp "$POD_NAME" -- sh -c 'echo "Student: Jane Doe" > /data/student.txt'
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `POD_NAME=$(kubectl ...)`: Queries JSONPath to capture the pod name dynamically into an environment variable.
+* `kubectl exec -n production-webapp "$POD_NAME" -- sh -c '...'`: Invokes a shell command inside the container to persist text into the mounted persistent volume directory `/data`.
+
 2. Confirm the file exists:
 ```bash
 kubectl exec -n production-webapp "$POD_NAME" -- cat /data/student.txt
 ```
+
 Output:
 ```text
 Student: Jane Doe
@@ -134,11 +159,19 @@ Student: Jane Doe
 kubectl delete pod -n production-webapp "$POD_NAME"
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete pod`: Kills the specific pod instance. The Deployment controller detects replica count is 1 instead of 2 and automatically schedules a new replacement pod.
+
 4. Wait for the new Pod to reach `Running` state and check the file again:
 ```bash
 NEW_POD=$(kubectl get pods -n production-webapp -l app=web-app -o jsonpath='{.items[0].metadata.name}')
 kubectl exec -n production-webapp "$NEW_POD" -- cat /data/student.txt
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `NEW_POD=$(...)`: Captures the name of the freshly scheduled replacement pod.
+* `kubectl exec ... cat /data/student.txt`: Verifies the data persisted through pod destruction, proving state persistence decoupled from container lifecycles.
+
 Expected output:
 ```text
 Student: Jane Doe
@@ -152,6 +185,10 @@ Forward port 80 to your local machine:
 ```bash
 kubectl port-forward -n production-webapp svc/web-service 8080:80
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl port-forward -n production-webapp svc/web-service 8080:80`: Opens a bidirectional TCP proxy tunnel between local port `8080` and cluster service port `80`.
+
 Open a browser or curl:
 ```bash
 curl http://localhost:8080
@@ -176,10 +213,17 @@ kubectl run load-generator -n production-webapp \
   -- /bin/sh -c "while true; do wget -q -O- http://web-service; done"
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl run load-generator ...`: Launches an infinite wget loop flooding the internal `web-service` DNS with HTTP requests to generate intense CPU load.
+
 Watch the autoscaler scale out:
 ```bash
 kubectl get hpa -n production-webapp -w
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get hpa -w`: Streams autoscaling calculations live as CPU climbs above 50% and replicas dynamically expand toward 5.
+
 Expected log over 2–3 minutes:
 ```text
 NAME          REFERENCE            TARGETS    MINPODS   MAXPODS   REPLICAS   AGE
@@ -194,6 +238,10 @@ Stop load and watch scale down:
 kubectl delete pod load-generator -n production-webapp
 kubectl get hpa -n production-webapp -w
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete pod load-generator`: Stops the synthetic load. Following a 5-minute stabilization cooldown window, the HPA controller safely terminates excess pods.
+
 *After the 5-minute stabilization window, replicas will gradually reduce back to 2.*
 
 ---
@@ -230,3 +278,14 @@ kubectl get hpa -n production-webapp -w
 1. **Challenge 1 (Target Tuning)**: Lower the HPA CPU threshold from `50%` to `30%` in `hpa.yaml`, reapply, and observe how much faster the workload scales out.
 2. **Challenge 2 (Readiness Gating)**: Modify `readinessProbe.httpGet.path` to `/does-not-exist`. Run `kubectl get endpoints -n production-webapp web-service`. Notice that Pod status is `Running`, but `READY` is `0/1` and the endpoints list is completely empty!
 3. **Challenge 3 (Liveness Restart Loop)**: Modify `livenessProbe.httpGet.path` to `/crash`. Observe the `RESTARTS` count increment every 15 seconds in `kubectl get pods -w`.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Startup Probe:** Protects slow-starting legacy applications (e.g. JVM/Spring boot) by disabling liveness and readiness checks until the application has fully initialized, avoiding premature container kill loops.
+* **Readiness Probe:** Controls whether the Pod IP appears in Service Endpoints. If an app is warming up caches or database connections, readiness fails and traffic is routed elsewhere without restarting the container.
+* **Liveness Probe:** Detects deadlocks, memory leaks, or unrecoverable application state. When it fails repeatedly (`failureThreshold`), kubelet restarts the container.
+* **Probe Types:**
+  * `httpGet`: Issues an HTTP GET request; 200–399 is considered healthy.
+  * `tcpSocket`: Checks if a TCP port can be opened.
+  * `exec`: Executes a command inside the container; exit code 0 is healthy.

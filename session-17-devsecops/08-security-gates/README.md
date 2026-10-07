@@ -100,6 +100,12 @@ trivy image \
   session17-python:1.0
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `trivy image`: Inspects the specified image layers and packages for known CVEs.
+- `--severity HIGH,CRITICAL`: Enforces security policy by filtering out low-priority warnings and surfacing only severe risk findings.
+- `--exit-code 1`: Signals failure to GitHub Actions, stopping pipeline execution and preventing downstream `push` and `deploy` jobs from executing.
+- `needs: [test, sast, sca]`: Constructs a DAG barrier ensuring the Docker build job cannot execute if any unit test, SAST code scan, or SCA dependency scan fails.
+
 ## What Should Be Gated?
 
 | Check | Example Pipeline Behavior |
@@ -112,6 +118,16 @@ trivy image \
 | Docker build | Build failure blocks push |
 | Registry push | Failure blocks deployment |
 | Kubernetes rollout | Failed rollout makes deployment unsuccessful |
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **DevSecOps:** Integrating security practices, automated testing, and compliance checks transparently into every phase of the DevOps software delivery lifecycle.
+- **Shift-Left Security:** Moving security testing earlier in the software development lifecycle (during commit and pull-request CI stages) rather than discovering vulnerabilities in production.
+- **Quality / Security Gate:** An automated policy checkpoint that evaluates security test results and halts the pipeline if pre-established criteria are not met.
+- **Break the Build:** A deliberate CI engineering practice where security or test violations terminate workflow execution with non-zero exit codes to prevent broken or insecure artifacts from progressing.
+
+---
 
 ## DevSecOps Mindset
 

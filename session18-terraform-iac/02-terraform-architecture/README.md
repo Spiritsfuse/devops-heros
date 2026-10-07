@@ -120,14 +120,30 @@ terraform state list
 terraform show
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform state list`: Dumps all resource addresses present in the current state file (`terraform.tfstate`).
+- `terraform show`: Displays a comprehensive, human-readable view of all attributes, IDs, and metadata for resources tracked in the state file or a plan file.
+- `terraform destroy`: Removes all managed infrastructure recorded in the state file.
+
 ## Cleanup
 
 ```bash
 terraform destroy
 ```
 
+---
+
+### 📚 Tech Jargons Demystified:
+- **Core Architecture:** The two main engine layers of Terraform: **Terraform Core** (evaluates configuration files, builds dependency graphs, manages state) and **Terraform Plugins** (cloud-specific provider binaries communicating over gRPC).
+- **gRPC Provider Communication:** Terraform Core launches provider binaries as child processes and interacts with them via local RPC (Remote Procedure Call) protocols.
+- **Resource Address:** An unambiguous unique identifier for a managed resource within a configuration (e.g. `aws_s3_bucket.architecture_demo`).
+- **Desired State vs Current State:** Desired state is what you specify in `.tf` files; Current state is what actually exists in AWS; State file is Terraform's cached record. `terraform plan` computes the difference (`delta`).
+
+---
+
 ## Important Idea
 
 Terraform is declarative.
 
 You describe **what you want**, not every API call required to create it.
+

@@ -78,3 +78,47 @@ When a container in the `default` namespace calls `curl http://backend`:
 4. **ExternalName Service**:
    - CNAME redirect to external domain:
    - `my-db.default.svc.cluster.local -> db.external-provider.com`
+
+---
+
+## 6. Hands-On Verification & FQDN Testing Commands
+
+To test and prove FQDN resolution inside your Kubernetes cluster, run an interactive testing container:
+
+```bash
+# Launch an interactive ephemeral container
+kubectl run fqdn-tester --image=curlimages/curl:8.5.0 -it --rm -- sh
+
+# Inside the test pod:
+# 1. Test short service name resolution within the same namespace
+curl -s http://payment-service:8080/health
+
+# 2. Test cross-namespace communication using two-part qualification (<service>.<namespace>)
+curl -s http://inventory-service.warehouse:8080/health
+
+# 3. Test absolute FQDN resolution (bypassing search paths)
+curl -s http://inventory-service.warehouse.svc.cluster.local:8080/health
+```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl run fqdn-tester --image=curlimages/curl:8.5.0 -it --rm -- sh`:
+  * `run fqdn-tester`: Creates a lightweight pod named `fqdn-tester`.
+  * `--image=curlimages/curl:8.5.0`: Uses an Alpine-based curl image.
+  * `-it`: Interactive mode with TTY attached.
+  * `--rm`: Ensures the test pod is automatically purged upon exit, keeping the cluster clean.
+  * `sh`: Starts a POSIX shell session inside the container.
+* `curl -s http://payment-service:8080/health`:
+  * Resolves short name via pod's `/etc/resolv.conf` search path (`<service>.<namespace>.svc.cluster.local`).
+  * `-s`: Silent flag suppressing curl's download progress.
+* `curl -s http://inventory-service.warehouse:8080/health`:
+  * Reaches across namespaces. Resolves through the second search entry: `warehouse.svc.cluster.local`.
+* `curl -s http://inventory-service.warehouse.svc.cluster.local:8080/health`:
+  * Sends the full canonical FQDN. CoreDNS resolves it immediately without iterating through search domains, saving DNS round trips.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **FQDN (Fully Qualified Domain Name):** An absolute domain name ending with the root dot (explicit or implied), specifying the complete path from the host to the top-level domain (`service.namespace.svc.cluster.local`).
+* **Search Domains:** Suffixes defined in `/etc/resolv.conf` that the OS automatically appends to unqualified domain names before querying the DNS server.
+* **Relative / Unqualified Domain Name:** A simple name like `backend` or `database` that requires search path expansion to locate.
+* **SRV (Service) Records:** Kubernetes DNS also creates SRV records for named ports (e.g. `_http._tcp.my-service.my-ns.svc.cluster.local`), enabling clients to discover both the port number and IP address dynamically.

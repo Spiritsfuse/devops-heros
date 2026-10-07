@@ -16,6 +16,15 @@ A developer might do:
 kubectl apply -f deployment.yaml
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `kubectl`: The client CLI executing on the developer's laptop.
+- `apply`: Pushes configuration imperatively to the cluster API.
+- `-f deployment.yaml`: Targets a local file on the developer's workstation.
+- **The Problem with Traditional Deployment**:
+  1. Requires developers to have direct admin credentials (`kubeconfig`) to the production cluster, introducing security risks.
+  2. If an engineer manually tweaks the deployment (`kubectl edit` or `kubectl scale`), no history or audit trail is recorded.
+  3. Risk of **configuration drift**—what is running in the cluster no longer matches what is committed in Git.
+
 Directly:
 
 ```text
@@ -139,11 +148,23 @@ Apply it manually once just to understand Kubernetes:
 kubectl apply -f app/
 ```
 
+#### 💡 Command Breakdown (`cmd-explained`):
+- `kubectl apply`: Submits the resource definitions to the Kubernetes API server.
+- `-f app/`: Recursively processes all YAML manifest files found in the `app/` folder (such as `deployment.yaml` and `service.yaml`) in a single batch call.
+- **Theory Connection**: Creates the initial baseline workload in Kubernetes so we can observe how controllers manage pods.
+
 Check:
 
 ```bash
 kubectl get deployment
 ```
+
+#### 💡 Command Breakdown (`cmd-explained`):
+- `get deployment`: Queries the cluster for Deployment controllers in the current namespace.
+- **Output Columns Explained**:
+  - `READY 2/2`: 2 pods out of 2 requested are actively passing readiness probes.
+  - `UP-TO-DATE 2`: 2 pods have been updated to achieve the latest pod template specification.
+  - `AVAILABLE 2`: 2 pods are currently available to serve client traffic.
 
 Expected shape:
 
@@ -183,3 +204,12 @@ Git = desired state
 Cluster = actual state
 Argo CD = keeps them synchronized
 ```
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Push-based CI/CD**: A pipeline (e.g., Jenkins, GitHub Actions) that stores cluster credentials and directly runs `kubectl apply` against the cluster. If the pipeline fails or is bypassed, the cluster state drifts.
+- **Pull-based GitOps**: An in-cluster operator (like Argo CD) that periodically pulls desired state from Git. The cluster pulls changes inward, so no external system needs cluster admin credentials.
+- **Configuration Drift**: The discrepancy when the live environment (actual state) differs from what is declared in Git (desired state), caused by emergency manual edits or out-of-band changes.
+- **Reconciliation Loop**: The infinite background control loop executed by GitOps agents: `Observe -> Compare -> Reconcile (heal)`.
+- **Single Source of Truth (SSOT)**: The architectural principle that the Git repository is the sole authoritative definition of the entire infrastructure and application stack.

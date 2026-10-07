@@ -153,6 +153,11 @@ GITHUB_TOKEN          = automatically provided by GitHub
     docker push ghcr.io/${{ github.repository }}/myapp:latest
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin`: Authenticates the Docker client with GitHub Container Registry (`ghcr.io`). Using `--password-stdin` reads the authentication token securely from STDIN without leaving credentials visible in system process lists (`ps`).
+- `${{ github.actor }}`: Context variable representing the GitHub username of the person who initiated the workflow.
+- `docker push ghcr.io/${{ github.repository }}/myapp:latest`: Uploads the built container image to the repository's container package registry on GitHub.
+
 `GITHUB_TOKEN` lets you push to GitHub Container Registry and GitHub Packages without creating a separate secret.
 
 ---
@@ -169,7 +174,16 @@ GITHUB_TOKEN is provided automatically for every run
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **`--password-stdin` Flag:** Best security practice when logging into Docker registries. It avoids passing passwords as CLI arguments (which get recorded in bash history and process tables), piping the password directly through standard input.
+- **`GITHUB_TOKEN`:** An auto-generated JSON Web Token (JWT) provided by GitHub to each workflow job with scoped permissions, expiring automatically when the job ends.
+- **GHCR (GitHub Container Registry):** GitHub's hosted OCI container registry (`ghcr.io`) allowing seamless Docker image hosting alongside source repositories.
+- **Environment Protection Rules:** Production approval requirements (such as required reviewers or deployment wait timers) enforced before workflows can access environment-scoped secrets.
+
+---
+
 ## Reference
 
 * **Using secrets in GitHub Actions:** https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions
 * **GITHUB_TOKEN permissions:** https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication
+

@@ -44,6 +44,12 @@ Read one output:
 terraform output bucket_id
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `terraform output`: Dumps all exposed root module output values in key-value format directly to terminal output.
+- `terraform output bucket_id`: Queries state specifically for the named output `bucket_id`.
+- `terraform output -raw <name>`: Prints only the raw string value without quotes or formatting, ideal for piping into shell scripts or environment variables.
+- `terraform output -json`: Dumps outputs as a JSON object, ideal for CI/CD automation parsers (`jq`).
+
 Example:
 
 ```text
@@ -76,3 +82,12 @@ Then run:
 terraform apply
 terraform output bucket_name
 ```
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Output Values:** Named return values declared in configuration (`output "name" { value = ... }`) allowing Terraform to expose created resource attributes.
+- **Cross-Stack Integration:** Using outputs to feed identifiers (like VPC subnet IDs or database connection strings) from one Terraform workspace/state into another via `terraform_remote_state`.
+- **Sensitive Outputs (`sensitive = true`):** Flag hiding database passwords or private keys from CLI terminal outputs while still storing them securely in the state file.
+- **Root Module vs Child Module Outputs:** Child module outputs are used by parent modules to pass values; root module outputs are displayed to the user after `terraform apply`.
+

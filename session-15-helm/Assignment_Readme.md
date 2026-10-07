@@ -1,9 +1,9 @@
-# Session 15: Helm Package Manager – Assignment
+# Session 15: Helm Package Manager - Assignment
 
 ## Student Information
 - **Name:** Dhruv Sharma
 - **Enrollment Number (Roll No):** 24BCS10294
-- **Session:** Session 15 – Kubernetes Package Management with Helm
+- **Session:** Session 15 - Kubernetes Package Management with Helm
 - **Repository:** `devops-heros/session-15-helm`
 
 ---
@@ -159,27 +159,17 @@ helm upgrade --install notes-prod ./mini-project/notes-chart -f ./mini-project/n
 
 ---
 
-## Screenshot Placeholders & Deliverables Checklist
+## Screenshot Evidences & Deliverables Checklist
 
-### Screenshot Placeholders:
-1. **Repository Search & Add**:
-   ![Helm Repo & Search](screenshots/01-helm-repo-search.png)
-   *(Run `helm repo add` & `helm search repo`)*
-2. **Chart Scaffolding & Linting**:
-   ![Helm Create & Lint](screenshots/02-helm-create-lint.png)
-   *(Run `helm lint ./mini-project/notes-chart`)*
-3. **Installation & List**:
-   ![Helm Install & List](screenshots/03-helm-install-list.png)
-   *(Run `helm install` & `helm list`)*
-4. **Upgrade & History**:
-   ![Helm Upgrade & History](screenshots/04-helm-upgrade-history.png)
-   *(Run `helm upgrade` & `helm history`)*
-5. **Rollback & Health Verification**:
-   ![Helm Rollback & Verify](screenshots/05-helm-rollback-verify.png)
-   *(Run `helm rollback` & `kubectl get pods`)*
-6. **Teardown**:
-   ![Helm Uninstall](screenshots/06-helm-uninstall.png)
-   *(Run `helm uninstall`)*
+### Screenshots & Evidences:
+1. **Repository Search & Package Discovery (`helm search repo`)**:
+   ![Helm Search](screenshots/01-helm-repo-search.png)
+
+2. **Chart Installation & Status Inspection (`helm install` & `helm list` & `helm status`)**:
+   ![Helm Install & List](screenshots/02-helm-install-list-status.png)
+
+3. **Release Upgrade, History & Rollback Lifecycle (`helm upgrade` & `helm history` & `helm rollback`)**:
+   ![Helm Upgrade & Rollback](screenshots/03-helm-upgrade-rollback-history.png)
 
 | Deliverable | Location | Status |
 | :--- | :--- | :---: |

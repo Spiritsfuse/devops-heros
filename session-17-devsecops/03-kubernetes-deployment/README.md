@@ -74,6 +74,10 @@ kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl apply -f <file>`: Declaratively creates or updates Kubernetes API resources defined in YAML manifests.
+- `-f` (or `--filename`): Points to the target file or directory of resource specifications.
+
 Check:
 
 ```bash
@@ -88,6 +92,12 @@ Test a local cluster:
 kubectl port-forward svc/devsecops-python-service 8080:5000
 curl http://localhost:8080/health
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl port-forward svc/<name> 8080:5000`: Establishes a direct local TCP proxy from localhost port 8080 to the Kubernetes Service's target port 5000, allowing local testing without cloud load balancers.
+- `curl http://localhost:8080/health`: Sends an HTTP GET request to verify the Flask/FastAPI health endpoint responds with `200 OK`.
+
+---
 
 ## Deployment from GitHub Actions
 
@@ -131,7 +141,13 @@ deploy:
         kubectl get pods
 ```
 
-`kubectl set image` updates the Deployment's container image and triggers a rolling update. `kubectl rollout status` watches the rollout until it completes. citeturn0search6turn0search1
+#### 💡 Command Breakdown (cmd-explained):
+- `azure/setup-kubectl@v4`: Installs and configures the `kubectl` CLI tool directly on the GitHub runner.
+- `base64 --decode > ~/.kube/config`: Decodes the base64-encoded Kubernetes cluster connection credentials stored in GitHub Secrets and writes it to the default `~/.kube/config` location.
+- `kubectl set image deployment/devsecops-python devsecops-python=<image>`: Imperatively mutates the pod template's image definition inside the Deployment object, triggering a Kubernetes rolling update.
+- `kubectl rollout status deployment/devsecops-python`: Synchronously monitors the rolling update in real-time, blocking the pipeline until all newly scheduled pods pass readiness probes or timing out on failure.
+
+`kubectl set image` updates the Deployment's container image and triggers a rolling update. `kubectl rollout status` watches the rollout until it completes.
 
 ## Important Classroom Note
 
@@ -150,6 +166,16 @@ Manual deployment practice
 ```
 
 For real automated CD, use a reachable cloud/shared cluster or an appropriately configured self-hosted runner.
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Rolling Update:** An automated deployment strategy where old pods are incrementally terminated only as new pods pass readiness probes, ensuring zero application downtime.
+- **`kubectl rollout status`:** A blocking command monitoring the transition state of a deployment until all replicas are up to date and healthy.
+- **Kubeconfig Secret:** A base64-encoded `~/.kube/config` file injected into CI/CD runners containing API server endpoints, TLS certificates, and service account tokens to authenticate against remote Kubernetes clusters.
+- **Readiness vs Liveness Probes:** Readiness probes tell Kubernetes when a pod is ready to accept user network traffic; liveness probes tell Kubernetes when to restart an unhealthy container.
+
+---
 
 ## Practice Questions
 

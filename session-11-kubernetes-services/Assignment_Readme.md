@@ -1,9 +1,9 @@
-# Kubernetes Networking & Services – Homework
+﻿# Kubernetes Networking & Services - Homework
 
 **Name:** Dhruv Sharma
 **Roll No:** 24BCS10294
 
-Manifests are from the class repository ([session-11-kubernetes-services](https://github.com/Nency-Ravaliya/devops-heros/tree/main/session-11-kubernetes-services)) and are copied into [manifests/](manifests). I ran all five service types on my local 2-node kind cluster. All outputs are copied from my terminal.
+Manifests are from the class repository ([session-11-kubernetes-services](https://github.com/Spiritsfuse/devops-heros/tree/main/session-11-kubernetes-services)) and are copied into [manifests/](manifests). I ran all five service types on my local 2-node kind cluster. All outputs are copied from my terminal.
 
 ## Why Services exist
 
@@ -34,7 +34,7 @@ Client Browser ──► [nodePort: 30080] (Host/Node IP)
                    [containerPort: 80] (the process inside the container)
 ```
 
-`containerPort` is documentation on the Pod spec (what the app listens on). `targetPort` is where the Service forwards to on the Pod. `port` is what the Service itself exposes inside the cluster. `nodePort` additionally opens that same path on every node's real IP, `30000–32767`.
+`containerPort` is documentation on the Pod spec (what the app listens on). `targetPort` is where the Service forwards to on the Pod. `port` is what the Service itself exposes inside the cluster. `nodePort` additionally opens that same path on every node's real IP, `30000-32767`.
 
 ---
 
@@ -199,18 +199,18 @@ pod/dns-test-client condition met
 
 $ kubectl get svc external-database-service
 NAME                        TYPE           CLUSTER-IP   EXTERNAL-IP        PORT(S)   AGE
-external-database-service   ExternalName   <none>       nencyravaliya.me   <none>    0s
+external-database-service   ExternalName   <none>       spiritsfuse.dev   <none>    0s
 
 $ kubectl exec dns-test-client -- nslookup external-database-service.default.svc.cluster.local
 Server:		10.96.0.10
 Address:	10.96.0.10:53
 
-external-database-service.default.svc.cluster.local	canonical name = nencyravaliya.me
+external-database-service.default.svc.cluster.local	canonical name = spiritsfuse.dev
 
-external-database-service.default.svc.cluster.local	canonical name = nencyravaliya.me
+external-database-service.default.svc.cluster.local	canonical name = spiritsfuse.dev
 ```
 
-**What I understood:** there is no ClusterIP, no selector and no Pods. CoreDNS simply answers with a `CNAME` (`canonical name = nencyravaliya.me`). The application can use the in-cluster name `external-database-service`, and if the external database moves, only the Service is edited and not the application.
+**What I understood:** there is no ClusterIP, no selector and no Pods. CoreDNS simply answers with a `CNAME` (`canonical name = spiritsfuse.dev`). The application can use the in-cluster name `external-database-service`, and if the external database moves, only the Service is edited and not the application.
 
 ## 5. Headless Service + StatefulSet
 
@@ -266,7 +266,7 @@ HTTP 200 from pod web-stateful-0
 - StatefulSet Pods have **stable names** (`web-stateful-0`, `-1`, `-2`), and each one gets its own DNS record: `<pod>.<service>.<namespace>.svc.cluster.local`. `web-stateful-1` resolved to exactly its own IP `10.244.1.47`.
 - Databases and clustered systems (MySQL replication, Kafka, MongoDB) need this, because a replica must talk to one specific peer, not to a random one.
 
-## 6. Troubleshooting – empty endpoints
+## 6. Troubleshooting - empty endpoints
 
 [manifests/empty-endpoints.yaml](manifests/empty-endpoints.yaml) has the selector `app: wrong-backend-name`, which matches no Pod.
 
@@ -277,20 +277,20 @@ service/broken-backend-service created
 $ kubectl get svc,endpointslices | grep -iE "NAME|broken|mismatch|empty"
 NAME                                TYPE           CLUSTER-IP      EXTERNAL-IP        PORT(S)        AGE
 service/broken-backend-service      ClusterIP      10.96.152.31    <none>             80/TCP         8s
-service/external-database-service   ExternalName   <none>          nencyravaliya.me   <none>         11s
+service/external-database-service   ExternalName   <none>          spiritsfuse.dev   <none>         11s
 NAME                                                            ADDRESSTYPE   PORTS     ENDPOINTS                             AGE
 endpointslice.discovery.k8s.io/broken-backend-service-qxkhx     IPv4          <unset>   <unset>                               8s
 ```
 
 **What I understood:** the Service is created without any error, but its EndpointSlice shows `<unset>`, so every request would fail. When a Service does not respond, the first things to check are:
 
-1. `kubectl get endpointslices` – is the list empty?
-2. `kubectl get pods --show-labels` – does the Service `selector` match the Pod labels **exactly**?
+1. `kubectl get endpointslices` - is the list empty?
+2. `kubectl get pods --show-labels` - does the Service `selector` match the Pod labels **exactly**?
 3. Does `targetPort` match the port the container really listens on?
 4. Are the Pods `Ready`? Pods that are not ready are removed from the endpoints.
 5. Is CoreDNS running: `kubectl get pods -n kube-system -l k8s-app=kube-dns`
 
-## 7. Services without a selector — manual `Endpoints`
+## 7. Services without a selector  -  manual `Endpoints`
 
 [manifests/06-no-selector/service.yaml](manifests/06-no-selector/service.yaml): a `Service` with no `selector` at all, paired with a hand-written `Endpoints` object pointing at an IP outside the cluster.
 
@@ -308,9 +308,9 @@ Selector:                 <none>
 Endpoints:                172.18.0.1:80
 ```
 
-**What I understood:** with no `selector`, Kubernetes does not manage the `Endpoints` object automatically — I own it. This is the pattern for pointing a stable in-cluster Service name at something Kubernetes doesn't manage: a legacy VM, an on-prem database, anything with a fixed IP outside the cluster. (`ExternalName`, from Section 4, is the DNS-only version of the same idea; a manual-Endpoints `ClusterIP` Service is the version that also gets a virtual IP and works with things that expect an IP, not just a DNS name.)
+**What I understood:** with no `selector`, Kubernetes does not manage the `Endpoints` object automatically  -  I own it. This is the pattern for pointing a stable in-cluster Service name at something Kubernetes doesn't manage: a legacy VM, an on-prem database, anything with a fixed IP outside the cluster. (`ExternalName`, from Section 4, is the DNS-only version of the same idea; a manual-Endpoints `ClusterIP` Service is the version that also gets a virtual IP and works with things that expect an IP, not just a DNS name.)
 
-## 8. Deployment vs. StatefulSet — pod identity under a delete
+## 8. Deployment vs. StatefulSet  -  pod identity under a delete
 
 Same drill as the [StatefulSet section in Session 10](../session10-k8s-core-objects/Assignment_Readme.md#7-statefulset--ordinal-identity-that-survives-a-delete), side by side with a plain Deployment:
 
@@ -326,16 +326,16 @@ $ kubectl get pods -l app=mysql
 mysql-1   1/1   Running   0   5s   # <- SAME name "mysql-1" again, new Pod, new IP, but the identity is preserved
 ```
 
-**What I understood:** a Deployment's ReplicaSet only guarantees a **count**; a replaced Pod gets a fresh, random identity. A StatefulSet guarantees **identity**: the Nth pod is always named `<name>-N`, always gets the same PVC back, and (with a headless Service) always gets the same DNS name — regardless of how many times it's rescheduled.
+**What I understood:** a Deployment's ReplicaSet only guarantees a **count**; a replaced Pod gets a fresh, random identity. A StatefulSet guarantees **identity**: the Nth pod is always named `<name>-N`, always gets the same PVC back, and (with a headless Service) always gets the same DNS name  -  regardless of how many times it's rescheduled.
 
-## 9. Deployment vs. StatefulSet vs. DaemonSet — architecture matrix
+## 9. Deployment vs. StatefulSet vs. DaemonSet  -  architecture matrix
 
 | | Deployment | StatefulSet | DaemonSet |
 |---|---|---|---|
 | Pod identity | Random suffix, disposable | Stable ordinal (`app-0`, `app-1`, …) | One per node, named after the node |
 | Startup order | All at once (parallel) | Sequential, one at a time | One per eligible node, in parallel |
 | Storage | Usually shared/none, or one PVC for all replicas | One PVC per Pod via `volumeClaimTemplates` | Usually `hostPath` or none |
-| Needs a Service? | Any type (ClusterIP/NodePort/LB) | Headless (`clusterIP: None`) for per-Pod DNS | Rarely — often scraped directly, not load-balanced |
+| Needs a Service? | Any type (ClusterIP/NodePort/LB) | Headless (`clusterIP: None`) for per-Pod DNS | Rarely  -  often scraped directly, not load-balanced |
 | Typical use | Stateless web/API tiers | Databases, queues, anything needing stable identity | Log/metrics agents, CNI plugins, node-level daemons |
 
 ## 10. Production cost optimization & Service selection decision tree
@@ -358,11 +358,11 @@ Need per-replica stable network identity (databases, peer discovery)?
  └─ Headless Service + StatefulSet (Section 5)
 ```
 
-**Why this matters for cost:** every `type: LoadBalancer` Service is a **separate, billed cloud resource** (roughly $18–25/month per LB on major clouds). Ten microservices each behind their own LoadBalancer is 10x that cost. The standard production pattern is one LoadBalancer in front of an **Ingress controller**, which then routes to any number of internal `ClusterIP` Services by host/path — see [Session 12](../session-12-ingress-configmaps-secrets/Assignment_Readme.md) for that exact setup.
+**Why this matters for cost:** every `type: LoadBalancer` Service is a **separate, billed cloud resource** (roughly $18-25/month per LB on major clouds). Ten microservices each behind their own LoadBalancer is 10x that cost. The standard production pattern is one LoadBalancer in front of an **Ingress controller**, which then routes to any number of internal `ClusterIP` Services by host/path  -  see [Session 12](../session-12-ingress-configmaps-secrets/Assignment_Readme.md) for that exact setup.
 
 ## 11. Minikube docker-driver NodePort gotcha
 
-On the docker driver (used here, and the default on macOS/Windows/most Linux setups), the Kubernetes node is itself a Docker container on an isolated bridge network — so `<minikube ip>:<nodePort>` does **not** reach it directly from the host, only `localhost`/NodePort access patterns that go through Docker's own port mapping work.
+On the docker driver (used here, and the default on macOS/Windows/most Linux setups), the Kubernetes node is itself a Docker container on an isolated bridge network  -  so `<minikube ip>:<nodePort>` does **not** reach it directly from the host, only `localhost`/NodePort access patterns that go through Docker's own port mapping work.
 
 ```text
 $ kubectl apply -f manifests/02-nodeport/app-deployment.yaml -f manifests/02-nodeport/service.yaml
@@ -384,7 +384,7 @@ $ docker exec minikube curl -s -o /dev/null -w "HTTP %{http_code}\n" http://loca
 HTTP 200
 ```
 
-**What I understood:** this isn't a broken cluster — it's the docker driver's network isolation. `minikube service <svc> --url` is the day-to-day fix (it keeps a tunnel open in that terminal); `minikube tunnel` does the same thing for `LoadBalancer` Services (Section 3); and `docker exec <node> curl ...` is a quick way to prove the Service itself works, from inside the node's own network namespace, when debugging.
+**What I understood:** this isn't a broken cluster  -  it's the docker driver's network isolation. `minikube service <svc> --url` is the day-to-day fix (it keeps a tunnel open in that terminal); `minikube tunnel` does the same thing for `LoadBalancer` Services (Section 3); and `docker exec <node> curl ...` is a quick way to prove the Service itself works, from inside the node's own network namespace, when debugging.
 
 ## Clean up
 
@@ -400,10 +400,10 @@ kubectl delete -f manifests/01-clusterip -f manifests/02-nodeport -f manifests/0
 
 *Exact grading guidelines are yet to be shared by the instructor; the checklist below is reconstructed from class notes and is what this submission targets.*
 
-1. **StatefulSet vs. DaemonSet vs. Deployment** — StatefulSet wasn't covered hands-on in the core-objects session; research it (a StatefulSet Pod is created and named in a particular, ordered manner) using `core-objects.md` from the class repo as a starting point.
-2. **ReplicaSet vs. Deployment** — be able to articulate the difference clearly: a bare ReplicaSet only keeps N Pods alive via a label selector, while a Deployment manages ReplicaSets on top of that to add rolling updates, revision history and rollback.
+1. **StatefulSet vs. DaemonSet vs. Deployment**  -  StatefulSet wasn't covered hands-on in the core-objects session; research it (a StatefulSet Pod is created and named in a particular, ordered manner) using `core-objects.md` from the class repo as a starting point.
+2. **ReplicaSet vs. Deployment**  -  be able to articulate the difference clearly: a bare ReplicaSet only keeps N Pods alive via a label selector, while a Deployment manages ReplicaSets on top of that to add rolling updates, revision history and rollback.
 3. Build a 4-revision Deployment history (V1 → V4) and specifically practice rolling back directly from V4 to V1 using a targeted rollback (`kubectl rollout undo deployment/<name> --to-revision=1`).
-4. Research **FQDN (Fully Qualified Domain Name) and CoreDNS** in Kubernetes and cover: what an FQDN is, what CoreDNS is, how Kubernetes' internal DNS resolution works, why it's needed, and how it resolves automatically — see [fqdn.md](fqdn.md) and the `dns-test/` folder for the hands-on side of this.
+4. Research **FQDN (Fully Qualified Domain Name) and CoreDNS** in Kubernetes and cover: what an FQDN is, what CoreDNS is, how Kubernetes' internal DNS resolution works, why it's needed, and how it resolves automatically  -  see [fqdn.md](fqdn.md) and the `dns-test/` folder for the hands-on side of this.
 5. Read through this folder's ClusterIP, NodePort, LoadBalancer, ExternalName and Headless Service examples before the next session, since they build directly on this DNS/FQDN groundwork.
 
 ---

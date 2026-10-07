@@ -64,6 +64,11 @@ terraform validate
 terraform plan
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `cp terraform.tfvars.example terraform.tfvars`: Copies the template values file into the automatically loaded `terraform.tfvars` file.
+- `terraform plan`: Automatically detects and evaluates `terraform.tfvars`, merging user values into variable definitions before calculating the execution diff.
+- `var.<name>`: Reference syntax in HCL to access variable values inside resources and local blocks.
+
 You should see a resource using your variable values.
 
 ## Important
@@ -100,6 +105,17 @@ Run:
 terraform plan
 ```
 
+---
+
+### 📚 Tech Jargons Demystified:
+- **Input Variables:** Parameterized inputs allowing Terraform code to be reusable across multiple environments (dev, stage, prod) without changing resource declarations.
+- **`terraform.tfvars`:** A standard definition file automatically read by Terraform during plan and apply to assign values to declared variables.
+- **Variable Precedence:** The strict order Terraform uses to resolve variable values: CLI flags (`-var`) > `terraform.tfvars` > `*.auto.tfvars` > Environment variables (`TF_VAR_name`) > Defaults.
+- **String Interpolation (`"${var.x}-${var.y}"`):** Embedding dynamic variable evaluations directly into strings.
+
+---
+
 ## Practice Question:
 
 **Why does changing a variable change the desired infrastructure configuration?**
+

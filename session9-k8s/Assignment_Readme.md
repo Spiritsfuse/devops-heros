@@ -1,4 +1,4 @@
-# Kubernetes Fundamentals – Homework
+﻿# Kubernetes Fundamentals - Homework
 
 **Name:** Dhruv Sharma
 **Roll No:** 24BCS10294
@@ -252,9 +252,9 @@ Kubernetes control plane is running at https://127.0.0.1:55624
 CoreDNS is running at https://127.0.0.1:55624/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 ```
 
-`minikube stop` was skipped against this cluster in this submission because it is a shared, long-running local instance also used for other work — stopping it is a one-line command (`minikube stop`, then `minikube status` shows `host: Stopped`) but not something to do against a cluster mid-use.
+`minikube stop` was skipped against this cluster in this submission because it is a shared, long-running local instance also used for other work  -  stopping it is a one-line command (`minikube stop`, then `minikube status` shows `host: Stopped`) but not something to do against a cluster mid-use.
 
-### Control Plane vs. Worker Node — architecture in one diagram
+### Control Plane vs. Worker Node  -  architecture in one diagram
 
 ```text
 +-------------------------------------------------------------------------------+
@@ -293,17 +293,17 @@ CoreDNS is running at https://127.0.0.1:55624/api/v1/namespaces/kube-system/serv
 
 **Control Plane (Master) components:**
 
-- **`kube-apiserver`** – the single front door for every read/write to the cluster. `kubectl`, controllers and the scheduler all talk to it over the REST API; nothing else touches `etcd` directly.
-- **`etcd`** – a distributed, consistent key-value store holding the entire desired-state of the cluster (every object's spec, plus most status).
-- **`kube-scheduler`** – watches for Pods with no assigned node, scores every candidate node on CPU/memory fit, affinity/anti-affinity and taints/tolerations, and binds the Pod to the best one.
-- **`kube-controller-manager`** – runs the reconciliation loops (Node controller, ReplicaSet controller, Endpoint/EndpointSlice controller, …) that continuously drive **current state → desired state**.
+- **`kube-apiserver`** - the single front door for every read/write to the cluster. `kubectl`, controllers and the scheduler all talk to it over the REST API; nothing else touches `etcd` directly.
+- **`etcd`** - a distributed, consistent key-value store holding the entire desired-state of the cluster (every object's spec, plus most status).
+- **`kube-scheduler`** - watches for Pods with no assigned node, scores every candidate node on CPU/memory fit, affinity/anti-affinity and taints/tolerations, and binds the Pod to the best one.
+- **`kube-controller-manager`** - runs the reconciliation loops (Node controller, ReplicaSet controller, Endpoint/EndpointSlice controller, …) that continuously drive **current state → desired state**.
 
 **Worker Node components:**
 
-- **`kubelet`** – the agent on every node; takes PodSpecs from the API server, tells the container runtime to pull images and start containers, and reports node/Pod health back.
-- **`kube-proxy`** – programs the node's network rules (`iptables`/IPVS) so a Service's virtual IP actually reaches the right Pod.
-- **Container runtime (`containerd`)** – the CRI implementation that actually pulls images and runs containers; `kubelet` talks to it, not to Docker directly.
-- **Pod** – the smallest deployable unit: one or more containers sharing one network namespace (IP) and storage volumes.
+- **`kubelet`** - the agent on every node; takes PodSpecs from the API server, tells the container runtime to pull images and start containers, and reports node/Pod health back.
+- **`kube-proxy`** - programs the node's network rules (`iptables`/IPVS) so a Service's virtual IP actually reaches the right Pod.
+- **Container runtime (`containerd`)** - the CRI implementation that actually pulls images and runs containers; `kubelet` talks to it, not to Docker directly.
+- **Pod** - the smallest deployable unit: one or more containers sharing one network namespace (IP) and storage volumes.
 
 ---
 
@@ -327,15 +327,15 @@ CoreDNS is running at https://127.0.0.1:55624/api/v1/namespaces/kube-system/serv
 
 *Exact grading guidelines are yet to be shared by the instructor; the checklist below is reconstructed from class notes and is what this submission targets.*
 
-1. Read through the official Kubernetes architecture documentation (`kubernetes.io/docs/concepts/architecture/`) and cross-check it against class notes — official docs are the primary source of truth, ahead of any third-party tutorial site.
+1. Read through the official Kubernetes architecture documentation (`kubernetes.io/docs/concepts/architecture/`) and cross-check it against class notes  -  official docs are the primary source of truth, ahead of any third-party tutorial site.
 2. Install **Minikube** (or an equivalent local cluster tool such as `kind`, used here).
 3. Confirm the cluster actually works: run `minikube start` (or `kind create cluster`), then check status, and walk through a "Hello Minikube"-style deployment to sanity-check the setup end-to-end.
 4. Optional: skim the "Learn Kubernetes Basics" tutorial (`kubernetes.io/docs/tutorials/kubernetes-basics/`), specifically the "Deploy an App" module, to preview next session's hands-on work.
-5. Write a Pod manifest **by hand** (not copy-pasted) — this repetition is what builds fluency with the four mandatory fields and the container spec structure.
+5. Write a Pod manifest **by hand** (not copy-pasted)  -  this repetition is what builds fluency with the four mandatory fields and the container spec structure.
 6. Run through the full command sequence: `kubectl version`, `kubectl cluster-info`, `kubectl get pods`, `kubectl get nodes`.
 7. Deploy the hand-written Pod with `kubectl apply -f pod.yaml`, confirm it reaches `Running` / `1/1` status via `kubectl get pods`.
 8. Deliberately test the `apply` vs. `create` difference: run `kubectl create -f pod.yaml` a second time against an already-applied Pod and observe the error; then make a small change to the file and re-run `kubectl apply -f pod.yaml` to see the update take effect cleanly.
-9. Optional/extra-credit: read through `core-objects.md` in the class Kubernetes repo now, even though ReplicaSet/Deployment/Service aren't taught hands-on until next session — this previews what's coming.
+9. Optional/extra-credit: read through `core-objects.md` in the class Kubernetes repo now, even though ReplicaSet/Deployment/Service aren't taught hands-on until next session  -  this previews what's coming.
 
 ---
 

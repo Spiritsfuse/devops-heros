@@ -47,6 +47,10 @@ In GitHub Actions:
 uses: actions/checkout@v6
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `git checkout`: In Git, switches branches or restores working tree files.
+- `uses: actions/checkout@v4` (or `@v6`): The standard GitHub action that downloads (clones) your repository's code onto the runner's workspace so subsequent steps can access files.
+
 ---
 
 ### Stage 2: Build
@@ -56,6 +60,9 @@ Convert source code into a buildable application.
 ./build.sh
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `./build.sh`: Executes a custom shell script in the local directory that compiles code, bundles modules, or packages binary assets.
+
 ---
 
 ### Stage 3: Test
@@ -64,6 +71,9 @@ Run automated tests.
 ```bash
 pytest
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `pytest`: Python test runner framework that auto-discovers files named `test_*.py` or `*_test.py`, runs test functions, and returns exit code 0 on pass or non-zero on failure.
 
 ---
 
@@ -105,3 +115,12 @@ flowchart LR
 ### 💡 Key Takeaway
 A CI/CD pipeline automates the journey:
 > **Code** → **Build** → **Test** → **Package** → **Deploy**
+
+---
+
+### 📚 Tech Jargons Demystified:
+- **Pipeline Stage:** A major milestone in the pipeline (e.g. Build, Test, Security, Deploy). Stages often depend sequentially on previous stages succeeding.
+- **Fail-Fast:** A DevOps principle where if an early step (like Lint or Unit Test) fails, the entire pipeline immediately terminates to save computing resources and alert the developer instantly.
+- **Packaging:** Bundling raw application source files, dependencies, and metadata into a standardized distribution artifact (such as a `.tar.gz`, `.whl`, or Docker container image).
+- **Automated Gatekeeper:** The pipeline itself acts as a gatekeeper protecting production, ensuring unreviewed, untested, or broken code can never be shipped.
+

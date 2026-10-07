@@ -94,6 +94,9 @@ Use it for a quick view.
 kubectl get pods
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pods`: Queries the API server for high-level state of all pods in the active namespace. Key triage columns: `READY` (e.g. `0/1`), `STATUS` (`CrashLoopBackOff`, `Pending`, `Running`), and `RESTARTS` (frequent restarts indicate an unstable process).
+
 **Question:**
 > "What is happening?"
 
@@ -106,6 +109,9 @@ Use it for detailed information.
 ```bash
 kubectl describe pod <pod-name>
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe pod <name>`: Fetches full object schema and recent lifecycle Events recorded by the kubelet and scheduler. Crucial for diagnosing why a pod cannot start before container logs even exist.
 
 **Question:**
 > "What details can explain the problem?"
@@ -120,6 +126,9 @@ Use it to see application output.
 kubectl logs <pod-name>
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl logs <pod-name>`: Fetches stdout and stderr streams from the container runtime. Reveals unhandled exceptions, missing database connections, bad environment variables, or segmentation faults.
+
 **Question:**
 > "What is the application saying?"
 
@@ -132,6 +141,9 @@ Use it to run commands inside a running container.
 ```bash
 kubectl exec -it <pod-name> -- sh
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl exec -it <pod-name> -- sh`: Spawns an interactive shell inside the container to inspect local disk filesystem permissions, test network routes, or verify environment variables.
 
 **Question:**
 > "What can I see from inside the container?"
@@ -151,6 +163,9 @@ or:
 ```bash
 kubectl describe pod <pod-name>
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get events`: Shows cluster-wide chronological event stream (Image pulling, node assignment, volume mounting, probe failures, OOM kills). Add `--sort-by='.metadata.creationTimestamp'` for strict temporal ordering.
 
 **Question:**
 > "What did Kubernetes try, and what happened?"
@@ -185,6 +200,9 @@ kubectl logs <pod-name> --previous
 kubectl describe pod <pod-name>
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl logs <pod-name> --previous`: Essential flag `--previous` (`-p`). If the current container is continuously crashing or restarting, regular logs may be empty or only show initialization; `--previous` retrieves the crash dump from the *prior terminated instance*.
+
 ---
 
 ### ImagePullBackOff
@@ -211,6 +229,9 @@ ImagePullBackOff
 kubectl describe pod <pod-name>
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `describe pod <name>`: Scroll down to `Events:`. Identifies the exact pull failure reason: `404 Not Found` (wrong image/tag), `401 Unauthorized` (missing `imagePullSecrets`), or DNS timeout reaching the registry.
+
 Look at Events.
 
 ---
@@ -236,6 +257,9 @@ Pending
 kubectl describe pod <pod-name>
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `describe pod <name>`: If a pod is `Pending`, it has never been assigned to a node. The `Events` section will display `FailedScheduling` (e.g. `0/3 nodes are available: 3 Insufficient cpu`, or node taint mismatch).
+
 Look at Events.
 
 ---
@@ -250,6 +274,9 @@ kubectl get service
 kubectl describe service <service-name>
 kubectl get endpoints <service-name>
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get endpoints <service-name>`: The ultimate litmus test for service connectivity. If `ENDPOINTS` is `<none>`, the service `selector` does not match the pod `labels`, or the pod readiness probe is failing!
 
 Most importantly:
 
@@ -286,6 +313,9 @@ Check CoreDNS logs:
 ```bash
 kubectl logs -n kube-system -l k8s-app=kube-dns
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl logs -n kube-system -l k8s-app=kube-dns`: Inspects CoreDNS pod logs for upstream timeouts, forwarding loops, or memory exhaustion.
 
 ---
 
@@ -342,3 +372,13 @@ Students should remember this:
 * Troubleshoot Services
 * Test Kubernetes DNS
 * Identify root causes instead of guessing
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **CrashLoopBackOff:** A state where a container repeatedly starts, crashes (exits with non-zero status), and Kubernetes backs off exponential restart delays (10s, 20s, 40s... up to 5 minutes) to avoid CPU thrashing on the node.
+* **ImagePullBackOff / ErrImagePull:**
+  * `ErrImagePull`: Initial failure to download the container image.
+  * `ImagePullBackOff`: Kubernetes enters an exponential backoff waiting loop before retrying the image pull.
+* **Pending Pod:** The pod has been accepted by the API server but has not been scheduled onto a worker node, usually due to lack of CPU/memory resources, unfulfilled PVCs, or unmatched node selectors/taints.
+* **Endpoints `<none>`:** Occurs when a Service's `spec.selector` fails to match the labels of any running Pods, or matching pods are failing their readiness probes, resulting in HTTP 503 or connection refused errors.

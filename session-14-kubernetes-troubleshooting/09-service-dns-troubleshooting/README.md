@@ -20,6 +20,9 @@ Apply:
 kubectl apply -f deployment.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f deployment.yaml`: Deploys 2 replicas of the web application labeled with `app: web`.
+
 Check:
 
 ```bash
@@ -46,6 +49,9 @@ Apply:
 kubectl apply -f service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f service.yaml`: Creates the ClusterIP Service configured with selector `app: web` and port mapping `80 -> 80`.
+
 Check:
 
 ```bash
@@ -71,6 +77,9 @@ Run:
 kubectl describe service web-service
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl describe service web-service`: Inspects the live routing mapping. Key fields: `Selector: app=web`, `Port: 80/TCP`, `TargetPort: 80/TCP`, and `Endpoints: 10.244.0.5:80,10.244.0.6:80`.
+
 Important things to check:
 * **Selector**
 * **Port**
@@ -86,6 +95,9 @@ Run:
 ```bash
 kubectl get endpoints web-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get endpoints web-service` (alias `kubectl get ep`): Directly queries the Endpoints controller. Confirms that pod private IPs are populated. If this returns `<none>`, traffic will never reach your pods.
 
 You should see Pod IP addresses. Example:
 
@@ -141,6 +153,9 @@ Create the DNS testing Pod:
 kubectl apply -f dns-test-pod.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f dns-test-pod.yaml`: Deploys a diagnostic alpine pod with `nslookup` and `wget` installed.
+
 Check:
 
 ```bash
@@ -163,6 +178,9 @@ Run:
 ```bash
 kubectl exec -it dns-test -- nslookup web-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl exec -it dns-test -- nslookup web-service`: Resolves short name `web-service` against CoreDNS. Verifies search domain completion (`web-service.default.svc.cluster.local`) and verifies the returned IP matches the service ClusterIP.
 
 You should get a result containing the Service IP. *(The exact output will depend on your cluster.)*
 
@@ -187,6 +205,12 @@ Run:
 ```bash
 kubectl exec dns-test -- wget -qO- http://web-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `wget`: Lightweight command-line HTTP retrieval tool.
+* `-q`: Quiet mode; hides progress bars.
+* `-O-`: Directs output to standard output (`-`) instead of writing to a local file.
+* `http://web-service`: Hits the Service VIP; `kube-proxy` load balances the request to one of the healthy pod endpoints.
 
 You should receive Nginx HTML output.
 
@@ -215,6 +239,9 @@ Apply:
 kubectl apply -f broken-service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl apply -f broken-service.yaml`: Applies a service configured with an invalid selector `app: does-not-exist`.
+
 Check:
 
 ```bash
@@ -226,6 +253,9 @@ Then:
 ```bash
 kubectl get endpoints broken-service
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get endpoints broken-service`: Shows `ENDPOINTS <none>`. Even though the service object exists with a valid ClusterIP, it has 0 target destinations.
 
 You should see:
 
@@ -291,6 +321,9 @@ Delete the broken Service:
 kubectl delete service broken-service
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete service broken-service`: Tears down the mismatched service object.
+
 The correct Service is:
 
 ```bash
@@ -329,6 +362,9 @@ Run:
 kubectl get pods --show-labels
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `--show-labels`: Appends a dedicated `LABELS` column displaying all key-value label tags assigned to each pod.
+
 You should see:
 
 ```text
@@ -361,6 +397,9 @@ Run:
 kubectl get pods -n kube-system
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl get pods -n kube-system`: Confirms that `coredns` pods are running with `1/1` containers ready.
+
 Look for CoreDNS Pods. Depending on your Kubernetes distribution, the names can differ. For many clusters you will see something similar to:
 
 ```text
@@ -377,6 +416,9 @@ Run:
 kubectl exec -it dns-test -- cat /etc/resolv.conf
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `cat /etc/resolv.conf`: Verifies the pod's DNS nameserver points to CoreDNS (usually `10.96.0.10`) and search paths include `<namespace>.svc.cluster.local`.
+
 You should see a Kubernetes DNS nameserver and search domains. *(The exact values depend on your cluster.)*
 
 ---
@@ -388,6 +430,9 @@ Run:
 ```bash
 kubectl logs -n kube-system -l k8s-app=kube-dns
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl logs -n kube-system -l k8s-app=kube-dns`: Streams CoreDNS operational logs. Look for plugin errors, forwarder timeouts, or SERVFAIL responses.
 
 If DNS is broken, CoreDNS status and logs are useful places to investigate.
 
@@ -453,3 +498,12 @@ The official DNS troubleshooting guide also recommends checking DNS resolution f
   https://kubernetes.io/docs/concepts/services-networking/service/
 * **Debug Services:**  
   https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **Endpoints vs EndpointSlices:**
+  * `Endpoints`: The traditional Kubernetes object grouping backend pod IPs for a Service.
+  * `EndpointSlice`: The modern scalable alternative breaking endpoints into chunks of 100 to reduce API network churn in clusters with thousands of pods.
+* **TargetPort Mismatch:** When `service.spec.ports[0].targetPort` is configured to port `8080`, but the application container actually listens on port `80`. The connection will time out even though DNS and Endpoints are populated.
+* **Service Virtual IP (VIP):** An IP address assigned from the service CIDR that does not exist on any physical network interface; `kube-proxy` translates packets addressed to this VIP into real Pod IPs using iptables or IPVS.

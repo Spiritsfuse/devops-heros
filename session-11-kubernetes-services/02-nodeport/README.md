@@ -133,10 +133,20 @@ spec:
 kubectl apply -f 02-nodeport/app-deployment.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl`: The Kubernetes Command-Line Interface used to communicate with the control plane's `kube-apiserver`.
+* `apply`: Declarative management command. Compares your YAML configuration with the live cluster state and applies differences without requiring pod restarts if specifications haven't changed.
+* `-f 02-nodeport/app-deployment.yaml`: Flag `-f` (filename/filepath) tells kubectl the path to the manifest file defining the 2-replica Nginx Deployment.
+
 Check pod status:
 ```bash
 kubectl get pods -l app=web-nodeport -o wide
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get pods`: Queries the API server for all running pod objects in the current namespace.
+* `-l app=web-nodeport`: Filter by label (`-l` / `--selector`). Only returns pods matching the key-value pair `app=web-nodeport`, filtering out unrelated workloads.
+* `-o wide`: Output formatting flag. Extends the default table to show essential diagnostic network details: Pod IP (`10.244.x.x`), host node name (`minikube` / `worker-1`), and readiness gate status.
 
 Expected Output:
 ```text
@@ -150,10 +160,17 @@ web-app-nodeport-77df98f8d9-v9z8k   1/1     Running   0          14s   10.244.0.
 kubectl apply -f 02-nodeport/service.yaml
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `apply -f 02-nodeport/service.yaml`: Creates or updates the `Service` of `type: NodePort`. Kube-apiserver instructs all kube-proxy instances across the cluster to listen on port `30080`.
+
 Verify the service and the port mapping:
 ```bash
 kubectl get svc web-service-nodeport
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `get svc`: Lists Service resources (`svc` is the canonical shorthand alias for `services`).
+* `web-service-nodeport`: Limits output to this specific service name, displaying its type (`NodePort`), allocated virtual `ClusterIP`, and port mapping tuple (`80:30080/TCP`).
 
 Expected Output:
 ```text
@@ -174,6 +191,9 @@ Find your worker node IP:
 kubectl get nodes -o wide
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+* `get nodes -o wide`: Lists all physical/virtual machines in your cluster with their Internal-IP, External-IP, OS image, and kernel version. The Internal-IP is the address you hit with your `nodePort` (`http://<Node-IP>:30080`).
+
 Send a request using curl or open in your browser:
 ```bash
 curl http://localhost:30080
@@ -182,6 +202,10 @@ Or with Minikube:
 ```bash
 curl http://$(minikube ip):30080
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `curl http://localhost:30080`: Sends an HTTP GET request to localhost on port 30080 (works if using Docker Desktop or Kind with port mappings configured).
+* `$(minikube ip)`: Command substitution in Bash/Zsh. Executes `minikube ip` first, retrieves the VM or container IP (e.g., `192.168.49.2`), and injects it dynamically into the curl URL.
 
 ### Method B: Minikube Service Tunnel (macOS / Docker driver)
 On macOS with Docker driver, the VM IP is inside a private network bridge. Minikube provides a helper command to open a live browser session:
@@ -192,6 +216,10 @@ Or to retrieve the direct reachable URL:
 ```bash
 minikube service web-service-nodeport --url
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `minikube service <svc-name>`: Native Minikube helper that resolves the routing bridge and launches your default operating system browser directly pointed at the active NodePort endpoint.
+* `--url`: Suppresses opening the browser window and prints just the raw HTTP/HTTPS URL string to stdout (ideal for shell scripts or piping to `curl`).
 
 ### Expected Output in Browser / Terminal:
 ```html
@@ -222,3 +250,19 @@ minikube service web-service-nodeport --url
 kubectl delete -f 02-nodeport/service.yaml
 kubectl delete -f 02-nodeport/app-deployment.yaml
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+* `kubectl delete -f <file>`: Tears down all objects declared in the YAML file. Kube-proxy removes iptables/IPVS routing rules for port 30080, and the replica pods are gracefully terminated.
+
+---
+
+### 📚 Tech Jargons Demystified:
+* **NodePort:** A service type allocating a static port from `30000-32767` on every node's external IP interface, allowing outside traffic to enter the cluster without a cloud load balancer.
+* **Port vs TargetPort vs NodePort:**
+  * `nodePort`: The external port opened on every cluster worker node (e.g., `30080`).
+  * `port`: The internal port inside the cluster where other pods reach the Service virtual IP (e.g., `80`).
+  * `targetPort`: The actual container listening port on the backend Pod (e.g., `80`).
+* **externalTrafficPolicy (Cluster vs Local):**
+  * `Cluster` (default): Traffic arriving at any node can be forwarded across the overlay network to a pod on another node (incurs a network hop and hides client source IP via SNAT).
+  * `Local`: Traffic is only routed to pods on the node receiving the request. Preserves client source IP, but packets are dropped if that node has no matching pods.
+* **kube-proxy:** The network proxy running on each node that maintains iptables/IPVS rules, mapping NodePort and ClusterIP traffic to target Pod IPs.

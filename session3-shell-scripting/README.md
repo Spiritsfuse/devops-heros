@@ -1,5 +1,9 @@
 # Session 3 - Shell Scripting: System Information Script
 
+## Student Information
+- **Name:** Dhruv Sharma
+- **Enrollment Number (Roll No):** 24BCS10294
+
 ## Task Overview
 A shell script designed to collect system metrics, prompt for user input, perform file/directory management, and store running processes using output redirection.
 

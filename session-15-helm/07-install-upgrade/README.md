@@ -65,6 +65,11 @@ spec:
 helm install web-app ./app-chart
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm install`: Packages and deploys a Helm chart to the active Kubernetes cluster as a new release.
+- `web-app`: The chosen release name for this deployment instance.
+- `./app-chart`: Path to the chart directory containing `Chart.yaml`, `values.yaml`, and `templates/`.
+
 Expected output:
 
 ```text
@@ -81,6 +86,9 @@ Check the deployment:
 kubectl get pods
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `kubectl get pods`: Queries the Kubernetes API server for all pods in the current namespace (`default`), displaying their readiness and status.
+
 Expected output:
 
 ```text
@@ -95,6 +103,9 @@ web-app-app-xxxx            1/1     Running   0          10s
 ```bash
 helm list
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `helm list` (or `helm ls`): Lists all deployed releases in the current Kubernetes namespace along with their status, chart version, and current revision number. Use `-A` or `--all-namespaces` to see releases across all namespaces.
 
 Expected output:
 
@@ -112,6 +123,12 @@ Upgrade the release with 3 replicas:
 ```bash
 helm upgrade web-app ./app-chart --set replicaCount=3
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `helm upgrade`: Modifies an already installed release with new chart files or updated values.
+- `web-app`: The existing release to upgrade.
+- `./app-chart`: The chart source directory.
+- `--set replicaCount=3`: Dynamically overrides the `replicaCount` parameter in `values.yaml` for this release.
 
 Expected output:
 
@@ -158,6 +175,9 @@ The safest command for CI/CD pipelines:
 helm upgrade --install web-app ./app-chart
 ```
 
+#### 💡 Command Breakdown (cmd-explained):
+- `helm upgrade --install` (or `-i`): Idempotent release deployment command. If `web-app` does not exist in the cluster, it runs `helm install`; if it already exists, it executes `helm upgrade`. Ideal for automated CI/CD deployment jobs.
+
 ---
 
 ## 7. Uninstall
@@ -165,6 +185,9 @@ helm upgrade --install web-app ./app-chart
 ```bash
 helm uninstall web-app
 ```
+
+#### 💡 Command Breakdown (cmd-explained):
+- `helm uninstall` (previously `helm delete`): Completely removes the release `web-app` and deletes all associated Kubernetes resources (Deployments, Services, ConfigMaps) managed by this release.
 
 Expected output:
 
@@ -186,7 +209,16 @@ Every install or upgrade creates a new revision. This enables rollback.
 
 ---
 
+### 📚 Tech Jargons Demystified:
+- **Release:** A running instance of a chart in a Kubernetes cluster. You can install the same chart multiple times with different release names (e.g., `web-dev`, `web-prod`).
+- **Revision:** An incremental numeric version (1, 2, 3...) assigned to every state change of a release. Helm stores revision manifests as Kubernetes secrets.
+- **Idempotency (`upgrade --install`):** The ability to run the deployment script repeatedly without error regardless of whether the application is being installed for the first time or updated.
+- **Atomic Operation:** Deploying all resources together where any failure triggers a rollback, preventing half-deployed broken states.
+
+---
+
 ## Reference
 
 * **Helm install:** https://helm.sh/docs/helm/helm_install/
 * **Helm upgrade:** https://helm.sh/docs/helm/helm_upgrade/
+
