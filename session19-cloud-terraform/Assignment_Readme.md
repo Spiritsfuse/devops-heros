@@ -188,21 +188,39 @@ All 8 cloud resources are safely terminated in reverse topological order, avoidi
 ## Screenshot Placeholders & Deliverables Checklist
 
 ### Screenshots & Evidences:
-1. **AWS Identity & CLI Configuration**:
-   ![AWS Identity](screenshots/aws_sts_get-caller-identity.png)
-   ![AWS Config](screenshots/aws_configure_list.png)
 
-2. **Terraform Init, Format & Validate**:
-   ![Terraform Init & Validate](screenshots/terraform_init_fmt_validate.png)
+#### 1. AWS Identity & CLI Configuration
+![AWS STS Caller Identity](screenshots/01-aws-sts-get-caller-identity.png)
+![AWS Configure List](screenshots/02-aws-configure-list.png)
 
-3. **Terraform Execution Plan**:
-   ![Terraform Plan](screenshots/terraform_plan_1.png)
+#### 2. Terraform Initialization, Formatting & Validation
+![Terraform Init, Format & Validate](screenshots/03-terraform-init-fmt-validate.png)
 
-4. **Terraform Apply & Provisioning**:
-   ![Terraform Apply](screenshots/terraform_apply_1.png)
+#### 3. Terraform Execution Plan (`terraform plan`)
+![Terraform Plan Part 1](screenshots/04-terraform-plan-1.png)
+![Terraform Plan Part 2](screenshots/05-terraform-plan-2.png)
+![Terraform Plan Part 3](screenshots/06-terraform-plan-3.png)
+![Terraform Plan Part 4](screenshots/07-terraform-plan-4.png)
+![Terraform Plan Part 5](screenshots/08-terraform-plan-5.png)
 
-5. **Terraform State List & Infrastructure Outputs**:
-   ![Terraform State & Outputs](screenshots/terraform_state_list_&_output.png)
+#### 4. Terraform Infrastructure Provisioning (`terraform apply`)
+![Terraform Apply Part 1](screenshots/09-terraform-apply-1.png)
+![Terraform Apply Part 2](screenshots/10-terraform-apply-2.png)
+![Terraform Apply Part 3](screenshots/11-terraform-apply-3.png)
+![Terraform Apply Part 4](screenshots/12-terraform-apply-4.png)
+![Terraform Apply Part 5](screenshots/13-terraform-apply-5.png)
+
+#### 5. Terraform State Inspection (`terraform show`)
+![Terraform Show Part 1](screenshots/14-terraform-show-1.png)
+![Terraform Show Part 2](screenshots/15-terraform-show-2.png)
+![Terraform Show Part 3](screenshots/16-terraform-show-3.png)
+![Terraform Show Part 4](screenshots/17-terraform-show-4.png)
+![Terraform Show Part 5](screenshots/18-terraform-show-5.png)
+![Terraform Show Part 6](screenshots/19-terraform-show-6.png)
+
+#### 6. Terraform State List & Infrastructure Outputs
+![Terraform State List & Outputs](screenshots/20-terraform-state-list-output.png)
+
 
 
 | Deliverable | Location | Status |
